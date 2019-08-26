@@ -1,5 +1,6 @@
 # PyCaprio
 ![Python versions](https://img.shields.io/badge/Python-3.6%2C%203.7-green.svg) ![PyPi](https://img.shields.io/badge/PyPi-0.0.1-brightgreen.svg) ![coverage](https://img.shields.io/badge/coverage-100%25-green.svg)
+
 Python client to the [INCEpTION](https://github.com/inception-project/inception) annotation tool.
 
 ## Installation
