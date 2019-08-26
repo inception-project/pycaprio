@@ -12,6 +12,7 @@ packages = [
 python = "^3.6"
 requests = "*"
 tenacity = "^5.1"
+pytest-cov = "^2.7"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
