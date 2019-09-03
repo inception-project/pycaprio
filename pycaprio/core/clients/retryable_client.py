@@ -26,9 +26,9 @@ class RetryableInceptionClient(BaseInceptionClient):
         self.session = requests.Session()
         self.session.auth = authentication
 
-    def get(self, url: str, data: Optional[dict] = None,
+    def get(self, url: str, params: Optional[dict] = None,
             allowed_statuses: Optional[status_list_type] = None) -> requests.Response:
-        return self.request('get', url, allowed_statuses, data=data)
+        return self.request('get', url, allowed_statuses, params=params)
 
     def post(self, url: str, data: Optional[dict] = None, form_data: Optional[dict] = None, json: Optional[dict] = None,
              files: Optional[dict] = None,
