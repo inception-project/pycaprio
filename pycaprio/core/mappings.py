@@ -4,8 +4,16 @@ NO_DOCUMENT = -1
 
 
 class DocumentFormats:
-    DEFAULT = 'text'
+    DEFAULT = 'webanno'
+    WEBANNO = 'webanno'
+    NIF = 'nif'
+    LIF = 'lif'
+    TEI = 'dkpro-core-tei'
+    PERSEUS = 'perseus_2.1'
+    CONLLU = 'conllu'
     TEXT = 'text'
+    JSON = 'json'
+    XMI = 'xmi'
 
 
 class DocumentStatus:

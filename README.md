@@ -1,5 +1,5 @@
 # PyCaprio
-![Python versions](https://img.shields.io/badge/Python-3.6%2C%203.7-green.svg) ![PyPi](https://img.shields.io/badge/PyPi-0.0.1-brightgreen.svg) [![CircleCI](https://circleci.com/gh/Savanamed/pycaprio.svg?style=svg)](https://circleci.com/gh/Savanamed/pycaprio) [![codecov](https://codecov.io/gh/Savanamed/Pycaprio/branch/master/graph/badge.svg)](https://codecov.io/gh/Savanamed/Pycaprio)
+![Python versions](https://img.shields.io/badge/Python-3.6%2C%203.7-green.svg) [![PyPI version](https://badge.fury.io/py/pycaprio.svg)](https://badge.fury.io/py/pycaprio) [![CircleCI](https://circleci.com/gh/Savanamed/pycaprio.svg?style=svg)](https://circleci.com/gh/Savanamed/pycaprio) [![codecov](https://codecov.io/gh/Savanamed/Pycaprio/branch/master/graph/badge.svg)](https://codecov.io/gh/Savanamed/Pycaprio)
 
 Python client to the [INCEpTION](https://github.com/inception-project/inception) annotation tool.
 
