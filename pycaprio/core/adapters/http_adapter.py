@@ -57,7 +57,7 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
     def annotation(self, project_id: int, document_id: int, user_name: str,
                    format: str = DocumentFormats.DEFAULT) -> bytes:
         response = self.client.get(f'/projects/{project_id}/documents/{document_id}/annotations/{user_name}',
-                                   allowed_statuses=(200,), data={'format': format})
+                                   allowed_statuses=(200,), params={'format': format})
         return response.content
 
     def create_project(self, project_name: str, creator_name: Optional[str] = None) -> Project:
