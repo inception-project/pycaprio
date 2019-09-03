@@ -54,9 +54,10 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
             annotation.document_id = document_id
         return annotation_list
 
-    def annotation(self, project_id: int, document_id: int, user_name: str) -> bytes:
+    def annotation(self, project_id: int, document_id: int, user_name: str,
+                   format: str = DocumentFormats.DEFAULT) -> bytes:
         response = self.client.get(f'/projects/{project_id}/documents/{document_id}/annotations/{user_name}',
-                                   allowed_statuses=(200,))
+                                   allowed_statuses=(200,), data={'format': format})
         return response.content
 
     def create_project(self, project_name: str, creator_name: Optional[str] = None) -> Project:
@@ -77,7 +78,7 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
         return document
 
     def create_annotation(self, project_id: int, document_id: int, user_name: str, content: IO,
-                          annotation_format: str = DocumentFormats.DEFAULT, state: str = AnnotationStatus):
+                          annotation_format: str = DocumentFormats.DEFAULT, state: str = AnnotationStatus.DEFAULT):
         response = self.client.post(f"/projects/{project_id}/documents/{document_id}/annotations/{user_name}",
                                     form_data={'format': annotation_format, 'state': state},
                                     files={"content": ('test/path', content)},
