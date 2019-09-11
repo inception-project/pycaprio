@@ -101,8 +101,9 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
                            allowed_statuses=(204, 200))
         return True
 
-    def export_project(self, project_id: int) -> bytes:
-        response = self.client.get(f"/projects/{project_id}/export.zip", allowed_statuses=(200,))
+    def export_project(self, project_id: int, format: str = DocumentFormats.DEFAULT) -> bytes:
+        response = self.client.get(f"/projects/{project_id}/export.zip", allowed_statuses=(200,),
+                                   params={'format': format})
         return response.content
 
     def import_project(self, zip_stream: IO) -> Project:
