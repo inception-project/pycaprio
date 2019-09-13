@@ -41,8 +41,9 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
             document.project_id = project_id
         return document_list
 
-    def document(self, project_id: int, document_id: int) -> bytes:
-        response = self.client.get(f'/projects/{project_id}/documents/{document_id}', allowed_statuses=(200,))
+    def document(self, project_id: int, document_id: int, document_format: str = DocumentFormats.DEFAULT) -> bytes:
+        response = self.client.get(f'/projects/{project_id}/documents/{document_id}', allowed_statuses=(200,),
+                                   params={'format': document_format})
         return response.content
 
     def annotations(self, project_id: int, document_id: int) -> List[Annotation]:
@@ -55,9 +56,9 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
         return annotation_list
 
     def annotation(self, project_id: int, document_id: int, user_name: str,
-                   format: str = DocumentFormats.DEFAULT) -> bytes:
+                   annotation_format: str = DocumentFormats.DEFAULT) -> bytes:
         response = self.client.get(f'/projects/{project_id}/documents/{document_id}/annotations/{user_name}',
-                                   allowed_statuses=(200,), params={'format': format})
+                                   allowed_statuses=(200,), params={'format': annotation_format})
         return response.content
 
     def create_project(self, project_name: str, creator_name: Optional[str] = None) -> Project:
@@ -67,10 +68,10 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
         return ProjectSchema().load(response.json()['body'])
 
     def create_document(self, project_id: int, document_name: str, content: IO,
-                        document_format: str = DocumentFormats.DEFAULT, state: str = DocumentStatus.DEFAULT):
+                        document_format: str = DocumentFormats.DEFAULT, document_state: str = DocumentStatus.DEFAULT):
         response = self.client.post(f"/projects/{project_id}/documents", form_data={"name": document_name,
                                                                                     "format": document_format,
-                                                                                    "state": state},
+                                                                                    "state": document_state},
                                     files={"content": ('test/path', content)},
                                     allowed_statuses=(201, 200))
         document = DocumentSchema().load(response.json()['body'], many=False)
@@ -78,9 +79,10 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
         return document
 
     def create_annotation(self, project_id: int, document_id: int, user_name: str, content: IO,
-                          annotation_format: str = DocumentFormats.DEFAULT, state: str = AnnotationStatus.DEFAULT):
+                          annotation_format: str = DocumentFormats.DEFAULT,
+                          annotation_state: str = AnnotationStatus.DEFAULT):
         response = self.client.post(f"/projects/{project_id}/documents/{document_id}/annotations/{user_name}",
-                                    form_data={'format': annotation_format, 'state': state},
+                                    form_data={'format': annotation_format, 'state': annotation_state},
                                     files={"content": ('test/path', content)},
                                     allowed_statuses=(201, 200))
         annotation = AnnotationSchema().load(response.json()['body'], many=False)
@@ -101,9 +103,9 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
                            allowed_statuses=(204, 200))
         return True
 
-    def export_project(self, project_id: int, format: str = DocumentFormats.DEFAULT) -> bytes:
+    def export_project(self, project_id: int, project_format: str = DocumentFormats.DEFAULT) -> bytes:
         response = self.client.get(f"/projects/{project_id}/export.zip", allowed_statuses=(200,),
-                                   params={'format': format})
+                                   params={'format': project_format})
         return response.content
 
     def import_project(self, zip_stream: IO) -> Project:

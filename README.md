@@ -1,7 +1,7 @@
 # PyCaprio
-![Python versions](https://img.shields.io/badge/Python-3.6%2C%203.7-green.svg) [![PyPI version](https://badge.fury.io/py/pycaprio.svg)](https://badge.fury.io/py/pycaprio) [![CircleCI](https://circleci.com/gh/Savanamed/pycaprio.svg?style=svg)](https://circleci.com/gh/Savanamed/pycaprio) [![codecov](https://codecov.io/gh/Savanamed/Pycaprio/branch/master/graph/badge.svg)](https://codecov.io/gh/Savanamed/Pycaprio)
+![Python versions](https://img.shields.io/badge/Python-3.6%2C%203.7-green.svg) [![PyPI version](https://badge.fury.io/py/pycaprio.svg)](https://badge.fury.io/py/pycaprio) [![Documentation Status](https://readthedocs.org/projects/pycaprio/badge/?version=latest)](https://pycaprio.readthedocs.io/en/latest/?badge=latest) [![CircleCI](https://circleci.com/gh/Savanamed/pycaprio.svg?style=svg)](https://circleci.com/gh/Savanamed/pycaprio) [![codecov](https://codecov.io/gh/Savanamed/Pycaprio/branch/master/graph/badge.svg)](https://codecov.io/gh/Savanamed/Pycaprio)
 
-Python client to the [INCEpTION](https://github.com/inception-project/inception) annotation tool.
+Python client for the [INCEpTION](https://github.com/inception-project/inception) annotation tool.
 
 ## Installation
 Pycaprio is on PyPi, you can install it via `pip`, `pipenv`, `poetry` or your favourite dependency management tool:
@@ -24,8 +24,7 @@ pycaprio_client = Pycaprio("http://inception-host.com", ('username', 'password')
 pycaprio_client.api.create_project("Project name", "creator-username")
 ```
 
-And so on.
-Although Pycaprio's API is simple and usable, proper documentation will roll in a few days.
+Check the [documentation](https://pycaprio.readthedocs.io) if you want to know more.
 
 ## License
 Pycaprio is under the MIT license. Check it out [here](https://opensource.org/licenses/MIT)

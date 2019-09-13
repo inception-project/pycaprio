@@ -12,7 +12,6 @@ packages = [
 python = "^3.6"
 requests = "*"
 tenacity = "^5.1"
-pytest-cov = "^2.7"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
@@ -21,6 +20,8 @@ requests-mock = "*"
 flake8 = "*"
 black = { version = "*", allows-prereleases = true }
 coverage = "*"
+mkdocs = "^1.0"
+pytest-cov = "^2.7"
 
 [tool.black]
 line-length = 120
