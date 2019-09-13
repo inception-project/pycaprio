@@ -3,9 +3,9 @@ import io
 
 import pytest
 
-from pycaprio.core.mappings import AnnotationStatus
+from pycaprio.core.mappings import AnnotationState
 from pycaprio.core.mappings import DATE_FORMAT_ISO8601
-from pycaprio.core.mappings import DocumentStatus
+from pycaprio.core.mappings import DocumentState
 from pycaprio.core.mappings import NO_DOCUMENT
 from pycaprio.core.mappings import NO_PROJECT
 from pycaprio.core.objects.annotation import Annotation
@@ -62,7 +62,7 @@ def mock_document_name():
 
 @pytest.fixture
 def mock_document_state():
-    return DocumentStatus.DEFAULT
+    return DocumentState.DEFAULT
 
 
 @pytest.fixture
@@ -89,7 +89,7 @@ def mock_annotation_user():
 
 @pytest.fixture
 def mock_annotation_state():
-    return AnnotationStatus.DEFAULT
+    return AnnotationState.DEFAULT
 
 
 @pytest.fixture

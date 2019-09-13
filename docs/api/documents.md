@@ -23,8 +23,8 @@ You can specify the annotation's format via `document_format` (defaults to `weba
 Example: 
 
 ```python
-from pycaprio.core.mappings import DocumentFormats
-document_content = client.api.document(1, 4, document_format=DocumentFormats.WEBANNO) # Downloads document 4 from project 1
+from pycaprio.mappings import InceptionFormat
+document_content = client.api.document(1, 4, document_format=InceptionFormat.WEBANNO) # Downloads document 4 from project 1
 
 with open("downloaded_document", 'wb') as document_file:
     document_file.write(document_content)
@@ -38,9 +38,9 @@ You can specify the document's state via `document_state` (defaults to `NEW`).
 Example:
 
 ```python
-from pycaprio.core.mappings import DocumentFormats, DocumentStatus
+from pycaprio.mappings import InceptionFormat, DocumentState
 with open("document") as document_file:
-    new_document = client.api.create_document(1, "Test document name", document_file, document_format=DocumentFormats.WEBANNO, document_state=DocumentStatus.IN_PROGRESS)
+    new_document = client.api.create_document(1, "Test document name", document_file, document_format=InceptionFormat.WEBANNO, document_state=DocumentState.IN_PROGRESS)
 print(new_document) # <Document #5: Test document name (Project: 1)>
 ```
 

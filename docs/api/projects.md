@@ -52,8 +52,8 @@ You can specify the export file format using the `format` parameter. By default,
 Example:
 
 ```python
-from pycaprio.core.mappings import DocumentFormats
-content = client.api.export_project(1, format=DocumentFormats.XMI) # type(content) is bytes
+from pycaprio.mappings import InceptionFormat
+content = client.api.export_project(1, project_format=InceptionFormat.XMI) # type(content) is bytes
 with open("exported_project.zip", 'wb') as zip_file:
     zip_file.write(content)
 ```

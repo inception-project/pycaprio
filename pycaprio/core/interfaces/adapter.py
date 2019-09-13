@@ -4,9 +4,9 @@ from typing import IO
 
 from typing import List
 
-from pycaprio.core.mappings import AnnotationStatus
-from pycaprio.core.mappings import DocumentFormats
-from pycaprio.core.mappings import DocumentStatus
+from pycaprio.core.mappings import AnnotationState
+from pycaprio.core.mappings import InceptionFormat
+from pycaprio.core.mappings import DocumentState
 from pycaprio.core.objects.annotation import Annotation
 from pycaprio.core.objects.document import Document
 from pycaprio.core.objects.project import Project
@@ -41,11 +41,12 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
         pass  # pragma: no cover
 
     @abstractmethod
-    def document(self, project_id: int, document_id: int, format: str = DocumentFormats.DEFAULT) -> bytes:
+    def document(self, project_id: int, document_id: int, document_format: str = InceptionFormat.DEFAULT) -> bytes:
         """
         Retrieves a Document
         :param project_id: The project_id of the Project where the Document is located
         :param document_id: Document id
+        :param document_format: Format in which the document will be downloaded
         :return: Content of the Document in bytes
         """
         pass  # pragma: no cover
@@ -62,12 +63,13 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
 
     @abstractmethod
     def annotation(self, project_id: int, document_id: int, annotation_id: int,
-                   format: str = DocumentFormats.DEFAULT) -> bytes:
+                   annotation_format: str = InceptionFormat.DEFAULT) -> bytes:
         """
         Retrieves a Document
         :param project_id: The project_id of the Project where the Annotation is located
         :param document_id: The document_id of the Document where the Annotation is located
-        :param format: Format in which the annotation will be downloaded
+        :param annotation_id: The annotation's id
+        :param annotation_format: Format in which the annotation will be downloaded
         :return: Content of the Annotation in bytes
         """
         pass  # pragma: no cover
@@ -85,22 +87,23 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
 
     @abstractmethod
     def create_document(self, project_id: int, document_name: str, content: IO,
-                        document_format: str = DocumentFormats.DEFAULT,
-                        state: str = DocumentStatus.DEFAULT) -> Document:
+                        document_format: str = InceptionFormat.DEFAULT,
+                        document_state: str = DocumentState.DEFAULT) -> Document:
         """
         Creates a Document
         :param project_id: Id of the Project where the new Document will be created
         :param document_name: Document name.
         :param content: Content of the Document.
         :param document_format: Document format.
-        :param state: State of the Document.
+        :param document_state: State of the Document.
         :return: Recently created Document
         """
         pass  # pragma: no cover
 
     @abstractmethod
     def create_annotation(self, project_id: int, document_id: int, user_name: str, content: IO,
-                          annotation_format: str = DocumentFormats.DEFAULT, state: str = AnnotationStatus.DEFAULT):
+                          annotation_format: str = InceptionFormat.DEFAULT,
+                          annotation_state: str = AnnotationState.DEFAULT):
         """
         Creates a Document
         :param project_id: Id of the Project where the new Document will be created
@@ -108,7 +111,7 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
         :param user_name: Annotator's username.
         :param content: Content of the Annotation.
         :param annotation_format: Annotation format.
-        :param state: State of the Annotation.
+        :param annotation_state: State of the Annotation.
         :return: Recently created Document.
         """
         pass  # pragma: no cover
@@ -141,11 +144,11 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
         pass  # pragma: no cover
 
     @abstractmethod
-    def export_project(self, project_id: int, format: str = DocumentFormats.DEFAULT) -> bytes:
+    def export_project(self, project_id: int, project_format: str = InceptionFormat.DEFAULT) -> bytes:
         """
         Exports a Project into a .zip file.
         :param project_id: Project id.
-        :param format: Format in which the documents and annotations will be exported.
+        :param project_format: Format in which the documents and annotations will be exported.
         :return: Zip file in bytes.
         """
         pass  # pragma: no cover

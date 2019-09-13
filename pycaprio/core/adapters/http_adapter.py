@@ -5,9 +5,9 @@ from typing import Optional
 from pycaprio.core.clients.retryable_client import RetryableInceptionClient
 from pycaprio.core.interfaces.adapter import BaseInceptionAdapter
 from pycaprio.core.interfaces.types import authentication_type
-from pycaprio.core.mappings import AnnotationStatus
-from pycaprio.core.mappings import DocumentFormats
-from pycaprio.core.mappings import DocumentStatus
+from pycaprio.core.mappings import AnnotationState
+from pycaprio.core.mappings import InceptionFormat
+from pycaprio.core.mappings import DocumentState
 from pycaprio.core.objects.annotation import Annotation
 from pycaprio.core.objects.document import Document
 from pycaprio.core.objects.project import Project
@@ -41,7 +41,7 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
             document.project_id = project_id
         return document_list
 
-    def document(self, project_id: int, document_id: int, document_format: str = DocumentFormats.DEFAULT) -> bytes:
+    def document(self, project_id: int, document_id: int, document_format: str = InceptionFormat.DEFAULT) -> bytes:
         response = self.client.get(f'/projects/{project_id}/documents/{document_id}', allowed_statuses=(200,),
                                    params={'format': document_format})
         return response.content
@@ -56,7 +56,7 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
         return annotation_list
 
     def annotation(self, project_id: int, document_id: int, user_name: str,
-                   annotation_format: str = DocumentFormats.DEFAULT) -> bytes:
+                   annotation_format: str = InceptionFormat.DEFAULT) -> bytes:
         response = self.client.get(f'/projects/{project_id}/documents/{document_id}/annotations/{user_name}',
                                    allowed_statuses=(200,), params={'format': annotation_format})
         return response.content
@@ -68,7 +68,7 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
         return ProjectSchema().load(response.json()['body'])
 
     def create_document(self, project_id: int, document_name: str, content: IO,
-                        document_format: str = DocumentFormats.DEFAULT, document_state: str = DocumentStatus.DEFAULT):
+                        document_format: str = InceptionFormat.DEFAULT, document_state: str = DocumentState.DEFAULT):
         response = self.client.post(f"/projects/{project_id}/documents", form_data={"name": document_name,
                                                                                     "format": document_format,
                                                                                     "state": document_state},
@@ -79,8 +79,8 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
         return document
 
     def create_annotation(self, project_id: int, document_id: int, user_name: str, content: IO,
-                          annotation_format: str = DocumentFormats.DEFAULT,
-                          annotation_state: str = AnnotationStatus.DEFAULT):
+                          annotation_format: str = InceptionFormat.DEFAULT,
+                          annotation_state: str = AnnotationState.DEFAULT):
         response = self.client.post(f"/projects/{project_id}/documents/{document_id}/annotations/{user_name}",
                                     form_data={'format': annotation_format, 'state': annotation_state},
                                     files={"content": ('test/path', content)},
@@ -103,7 +103,7 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
                            allowed_statuses=(204, 200))
         return True
 
-    def export_project(self, project_id: int, project_format: str = DocumentFormats.DEFAULT) -> bytes:
+    def export_project(self, project_id: int, project_format: str = InceptionFormat.DEFAULT) -> bytes:
         response = self.client.get(f"/projects/{project_id}/export.zip", allowed_statuses=(200,),
                                    params={'format': project_format})
         return response.content

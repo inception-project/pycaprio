@@ -3,7 +3,7 @@ NO_PROJECT = -1
 NO_DOCUMENT = -1
 
 
-class DocumentFormats:
+class InceptionFormat:
     DEFAULT = 'webanno'
     WEBANNO = 'webanno'
     NIF = 'nif'
@@ -16,7 +16,7 @@ class DocumentFormats:
     XMI = 'xmi'
 
 
-class DocumentStatus:
+class DocumentState:
     DEFAULT = 'NEW'
     NEW = 'NEW'
     LOCKED = 'LOCKED'
@@ -24,7 +24,7 @@ class DocumentStatus:
     COMPLETE = 'COMPLETE'
 
 
-class AnnotationStatus:
+class AnnotationState:
     DEFAULT = 'ANNOTATION-IN-PROGRESS'
     ANNOTATION_IN_PROGRESS = 'ANNOTATION-IN-PROGRESS'
     ANNOTATION_COMPLETE = 'ANNOTATION-COMPLETE'
