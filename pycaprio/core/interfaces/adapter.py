@@ -41,7 +41,7 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
         pass  # pragma: no cover
 
     @abstractmethod
-    def document(self, project_id: int, document_id: int) -> bytes:
+    def document(self, project_id: int, document_id: int, format: str = DocumentFormats.DEFAULT) -> bytes:
         """
         Retrieves a Document
         :param project_id: The project_id of the Project where the Document is located

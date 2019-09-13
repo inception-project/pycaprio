@@ -1,16 +1,28 @@
+.PHONY: docs tests
+
+# Dependencies
 dependencies:
 	poetry install
 
+# Tests
 unit-tests:
-	poetry run py.test tests/unit_tests
+	poetry run py.test --cov=pycaprio --cov-branch --cov-fail-under=90 tests/unit_tests
+
+tests: unit-tests
 
 coverage:
 	poetry run py.test --cov=pycaprio --cov-branch --cov-fail-under=90 --cov-report=html tests
 
+# Static analysis/linting
 lint:
 	poetry run flake8 pycaprio --max-line-length=120
 	poetry run flake8 tests --max-line-length=120 --ignore=E722
 
+# Docs
+docs:
+	mkdocs serve
+
+# Building and publishing
 build: unit-tests lint
 	poetry build
 
