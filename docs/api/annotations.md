@@ -25,8 +25,8 @@ You can specify the annotation's format via `annotation_format` (defaults to `we
 Example: 
 
 ```python
-from pycaprio.core.mappings import DocumentFormats
-annotation_content = client.api.annotation(1, 4, 'test-user', annotation_format=DocumentFormats.WEBANNO) # Downloads test-user's annotations on document 4 on project 1
+from pycaprio.mappings import InceptionFormat
+annotation_content = client.api.annotation(1, 4, 'test-user', annotation_format=InceptionFormat.WEBANNO) # Downloads test-user's annotations on document 4 on project 1
 
 with open("downloaded_annotation", 'wb') as annotation_file:
     annotation_file.write(annotation_content)
@@ -39,9 +39,9 @@ You can specify the annotation's format via `annotation_format` (defaults to `we
 Example:
 
 ```python
-from pycaprio.core.mappings import DocumentFormats, AnnotationStatus
+from pycaprio.mappings import InceptionFormat, AnnotationState
 with open("annotation") as annotation_file:
-    new_annotation = client.api.create_annotation(1, 4, 'leonardo-dicaprio', annotation_format=DocumentFormats.WEBANNO, annotation_state=AnnotationStatus.ANNOTATION_IN_PROGRESS)
+    new_annotation = client.api.create_annotation(1, 4, 'leonardo-dicaprio', annotation_format=InceptionFormat.WEBANNO, annotation_state=AnnotationState.ANNOTATION_IN_PROGRESS)
 print(new_annotation) # <Annotation by leonardo-dicaprio (Project: 1, Document: 4)>
 ```
 

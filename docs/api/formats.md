@@ -17,9 +17,9 @@ INCEpTION doesn't specify in their documentation which formats are supported, bu
 You can find a class with all the formats in `pycaprio.core.mappings.DocumentFormats`:
 
 ```python
-from pycaprio.core.mappings import DocumentFormats
+from pycaprio.core.mappings import InceptionFormat
 
-DocumentFormats.DEFAULT
-DocumentFormats.TEI
+InceptionFormat.DEFAULT
+InceptionFormat.TEI
 ...
 ```
