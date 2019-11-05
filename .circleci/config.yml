@@ -14,6 +14,32 @@ workflows:
           version: "3.7"
       - static_analysis:
           name: Static analysis
+
+  release-workflow:
+    jobs:
+      - tests:
+          filters:
+            tags:
+              only: /[0-9]+(\.[0-9]+)*a[0-9]+/
+            branches:
+              ignore: /.*/
+
+      - static-analysis:
+          filters:
+            tags:
+              only: /[0-9]+(\.[0-9]+)*a[0-9]+/
+            branches:
+              ignore: /.*/
+
+      - release-on-tag:
+          requires:
+            - unit_tests
+            - static-analysis
+          filters:
+            tags:
+              only: /[0-9]+(\.[0-9]+)*a[0-9]+/
+            branches:
+              ignore: /.*/
 jobs:
 
   unit_tests:
@@ -77,4 +103,46 @@ jobs:
             poetry run pytest --cov=pycaprio --cov-branch --cov-fail-under=90 --cov-report=xml --cov-report=html tests/unit_tests
       - codecov/upload:
           flags: unittest
+
+  release-on-tag:
+    docker:
+      - image: circleci/python:3.6
+
+      steps:
+        - checkout
+
+        - restore_cache:
+            keys:
+              - deps-{{ checksum "poetry.lock" }}
+        - run:
+            name: Install dependencies
+            command: |
+              pip install poetry
+              make dependencies
+
+        - save_cache:
+            key: deps-{{ checksum "poetry.lock" }}
+            paths:
+              - /home/circleci/.cache/pypoetry/virtualenvs
+        - run:
+            name: Publishing to PyPi
+            command: |
+              make ci-publish
+
+        - add_ssh_keys:
+            fingerprints:
+              - "c6:8c:e6:80:bc:30:74:4e:6b:6e:11:a3:03:ce:4a:d5"
+        - run:
+            name: Configure git credentials
+            command: |
+              git config user.email "ci@circleci.com"
+              git config user.name "CI bot"
+        - run:
+            name: Bump version
+            command: |
+              git checkout -b "release-${CIRCLE_TAG}"
+              make ci-bump-version
+              git checkout master
+              git merge "release-${CIRCLE_TAG}"
+              git push
 

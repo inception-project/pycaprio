@@ -28,3 +28,11 @@ build: unit-tests lint
 
 publish: build
 	poetry publish
+
+# CI
+
+ci-publish:
+	poetry publish --build --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" --no-interaction
+
+ci-bump-version:
+	poetry run bump2version patch

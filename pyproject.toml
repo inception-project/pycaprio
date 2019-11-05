@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pycaprio"
-version = "0.0.2rc6"
+version = "0.0.3"
 description = "Python client for the INCEpTION annotation tool API"
 authors = ["Savanamed"]
 license = "MIT"
@@ -22,6 +22,7 @@ black = { version = "*", allows-prereleases = true }
 coverage = "*"
 mkdocs = "^1.0"
 pytest-cov = "^2.7"
+bump2version = "^0.5.11"
 
 [tool.black]
 line-length = 120

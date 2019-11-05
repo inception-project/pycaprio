@@ -16,5 +16,8 @@ max_line_length = 120
 indent_size = 2
 insert_final_newline = ignore
 
+[*.yml]
+indent_size = 2
+
 [Makefile]
 indent_style = tab
