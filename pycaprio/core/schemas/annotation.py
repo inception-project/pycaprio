@@ -23,7 +23,9 @@ class AnnotationSchema(BaseInceptionSchema):
         if many:
             return [self.load(annotation) for annotation in serialized_annotation]
 
-        datetime_timestamp = datetime.datetime.strptime(serialized_annotation['timestamp'], DATE_FORMAT_ISO8601)
+        datetime_timestamp = None
+        if serialized_annotation['timestamp']:
+            datetime_timestamp = datetime.datetime.strptime(serialized_annotation['timestamp'], DATE_FORMAT_ISO8601)
 
         return Annotation(NO_PROJECT, NO_DOCUMENT, serialized_annotation['user'], serialized_annotation['state'],
                           datetime_timestamp)
@@ -31,5 +33,7 @@ class AnnotationSchema(BaseInceptionSchema):
     def dump(self, annotation: deserialized_type, many: bool = False):
         if many:
             return [self.dump(a) for a in annotation]
-        str_timestamp = annotation.timestamp.strftime(DATE_FORMAT_ISO8601)
+        str_timestamp = None
+        if annotation.timestamp:
+            str_timestamp = annotation.timestamp.strftime(DATE_FORMAT_ISO8601)
         return {'user': annotation.user_name, 'state': annotation.annotation_state, 'timestamp': str_timestamp}
