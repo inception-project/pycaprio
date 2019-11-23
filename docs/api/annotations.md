@@ -41,7 +41,7 @@ Example:
 ```python
 from pycaprio.mappings import InceptionFormat, AnnotationState
 with open("annotation") as annotation_file:
-    new_annotation = client.api.create_annotation(1, 4, 'leonardo-dicaprio', annotation_format=InceptionFormat.WEBANNO, annotation_state=AnnotationState.ANNOTATION_IN_PROGRESS)
+    new_annotation = client.api.create_annotation(1, 4, 'leonardo-dicaprio', annotation_file, annotation_format=InceptionFormat.WEBANNO, annotation_state=AnnotationState.ANNOTATION_IN_PROGRESS)
 print(new_annotation) # <Annotation by leonardo-dicaprio (Project: 1, Document: 4)>
 ```
 

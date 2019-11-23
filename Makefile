@@ -20,7 +20,7 @@ lint:
 
 # Docs
 docs:
-	mkdocs serve
+	poetry run mkdocs serve
 
 # Building and publishing
 build: unit-tests lint
