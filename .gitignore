@@ -43,3 +43,5 @@ coverage.xml
 # mypy
 .mypy_cache/
 
+# poetry lock
+poetry.lock
