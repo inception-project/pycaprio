@@ -16,7 +16,7 @@ class InceptionFormat:
     XMI = 'xmi'
 
 
-class DocumentState:
+class AnnotationState:
     DEFAULT = 'NEW'
     NEW = 'NEW'
     LOCKED = 'LOCKED'
@@ -24,8 +24,9 @@ class DocumentState:
     COMPLETE = 'COMPLETE'
 
 
-class AnnotationState:
-    DEFAULT = 'ANNOTATION-IN-PROGRESS'
+class DocumentState:
+    DEFAULT = 'NEW'
+    NEW = 'NEW'
     ANNOTATION_IN_PROGRESS = 'ANNOTATION-IN-PROGRESS'
     ANNOTATION_COMPLETE = 'ANNOTATION-COMPLETE'
     CURATION_IN_PROGRESS = 'CURATION-IN-PROGRESS'
