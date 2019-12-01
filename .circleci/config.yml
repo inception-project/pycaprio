@@ -21,14 +21,14 @@ workflows:
           version: "3.6"
           filters:
             tags:
-              only: /[0-9]+(\.[0-9]+)*a[0-9]+/
+              only: /[0-9]+(\.[0-9]+)*/
             branches:
               ignore: /.*/
 
       - static_analysis:
           filters:
             tags:
-              only: /[0-9]+(\.[0-9]+)*a[0-9]+/
+              only: /[0-9]+(\.[0-9]+)*/
             branches:
               ignore: /.*/
 
@@ -38,7 +38,7 @@ workflows:
             - static_analysis
           filters:
             tags:
-              only: /[0-9]+(\.[0-9]+)*a[0-9]+/
+              only: /[0-9]+(\.[0-9]+)*/
             branches:
               ignore: /.*/
 jobs:
