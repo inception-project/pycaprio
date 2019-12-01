@@ -4,16 +4,34 @@ NO_DOCUMENT = -1
 
 
 class InceptionFormat:
-    DEFAULT = 'webanno'
-    WEBANNO = 'webanno'
-    NIF = 'nif'
-    LIF = 'lif'
-    TEI = 'dkpro-core-tei'
-    PERSEUS = 'perseus_2.1'
+    DEFAULT = 'text'
+
+    BIN = 'bin'
+    CONLL2000 = 'conll2000'
+    CONLL2006 = 'conll2006'
+    CONLL2009 = 'conll2009'
+    CONLLCORENLP = 'conllcorenlp'
     CONLLU = 'conllu'
+    CTSV = 'ctsv'
+    CTSV3 = 'ctsv3'
+    DKPRO_CORE_TEI = 'dkpro-core-tei'
+    TEI = 'dkpro-core-tei'
+    HTML = 'html'
+    LIF = 'lif'
+    NIF = 'nif'
+    PDF = 'pdf'
+    PERSEUS_2_1 = 'perseus_2.1'
+    PUBANNOTATION_SECTIONS = 'pubannotation-sections'
+    TCF = 'tcf'
     TEXT = 'text'
-    JSON = 'json'
+    TEXTLINES = 'textlines'
+    TSV = 'tsv'
+
     XMI = 'xmi'
+
+    PERSEUS = 'perseus_2.1'
+    WEBANNO = 'tsv'
+    JSON = 'json'
 
 
 class AnnotationState:
