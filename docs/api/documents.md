@@ -39,7 +39,7 @@ Example:
 
 ```python
 from pycaprio.mappings import InceptionFormat, DocumentState
-with open("document") as document_file:
+with open("document", 'rb') as document_file:
     new_document = client.api.create_document(1, "Test document name", document_file, document_format=InceptionFormat.WEBANNO, document_state=DocumentState.IN_PROGRESS)
 print(new_document) # <Document #5: Test document name (Project: 1)>
 ```
