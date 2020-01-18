@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pycaprio"
-version = "0.0.4"
+version = "0.1.0"
 description = "Python client for the INCEpTION annotation tool API"
 authors = ["Savanamed"]
 license = "MIT"

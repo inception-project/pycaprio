@@ -22,7 +22,7 @@ projects = client.api.projects()
 # Export all projects in XMI format
 from pycaprio.mappings import InceptionFormat
 for project in projects:
-    zip_content = client.api.export_project(project.project_id, format=InceptionFormat.XMI)
+    zip_content = client.api.export_project(project, format=InceptionFormat.XMI)
     with open(f"{project.project_name}.zip", 'wb') as zip_file:
         zip_file.write(zip_content)
 ```

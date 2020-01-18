@@ -12,6 +12,9 @@ Pycaprio uses the `Annotation` object to model INCEpTION's documents, and has th
 ### List annotations
 Lists all the annotations in an INCEpTION's document.
 
+You can provide a `Project` instance instead of a `project_id` as well.
+You can provide a `Document` instance instead of a `document_id` as well.
+
 Example:
 ```python
 annotations = client.api.annotations(1, 4) # Annotations in document #4 in project #1
@@ -20,9 +23,13 @@ print(annotations) # [<Annotation by test-user (Project: 1, Document: 4)>, <Anno
 
 ### Download annotation
 Downloads a document's annotation content.
+
 You can specify the annotation's format via `annotation_format` (defaults to `webanno`).
 
-Example: 
+You can provide a `Project` instance instead of a `project_id` as well.
+You can provide a `Document` instance instead of a `document_id` as well.
+
+Example:
 
 ```python
 from pycaprio.mappings import InceptionFormat
@@ -34,19 +41,28 @@ with open("downloaded_annotation", 'wb') as annotation_file:
 
 ### Upload annotation
 Uploads an annotation to a document in INCEpTION. It requires the Id of the project, the Id of the document, the annotator's username and the annotation's content (io stream).
+
 You can specify the annotation's format via `annotation_format` (defaults to `webanno`) and its state via `annotation_state` (defaults to `NEW`).
- 
+
+You can provide a `Project` instance instead of a `project_id` as well.
+You can provide a `Document` instance instead of a `document_id` as well.
+
+
 Example:
 
 ```python
 from pycaprio.mappings import InceptionFormat, AnnotationState
-with open("annotation") as annotation_file:
+with open("annotation", 'rb') as annotation_file:
     new_annotation = client.api.create_annotation(1, 4, 'leonardo-dicaprio', annotation_file, annotation_format=InceptionFormat.WEBANNO, annotation_state=AnnotationState.ANNOTATION_IN_PROGRESS)
 print(new_annotation) # <Annotation by leonardo-dicaprio (Project: 1, Document: 4)>
 ```
 
 ### Delete annotation
-Deletes a document from a project.
+Deletes an annotation from a project.
+
+You can provide a `Project` instance instead of a `project_id` as well.
+You can provide a `Document` instance instead of a `document_id` as well.
+
 
 Example:
 
