@@ -12,6 +12,9 @@ workflows:
       - unit_tests:
           name: Python 3.7 unit tests
           version: "3.7"
+      - unit_tests:
+          name: Python 3.8 unit tests
+          version: "3.8"
       - static_analysis:
           name: Static analysis
 
