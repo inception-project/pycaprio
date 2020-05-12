@@ -10,6 +10,7 @@ from pycaprio.core.mappings import DocumentState
 from pycaprio.core.objects.annotation import Annotation
 from pycaprio.core.objects.document import Document
 from pycaprio.core.objects.project import Project
+from pycaprio.core.objects.curation import Curation
 
 
 class BaseInceptionAdapter(metaclass=ABCMeta):
@@ -140,6 +141,7 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
     def delete_annotation(self, project: Union[Project, int], document: Union[Document, int], user_name: str) -> bool:
         """
         Deletes an Annotation from a Document in a Project
+        :param user_name: Annotator's username.
         :param project: Project/Project id.
         :param document: Document/Document id.
         """
@@ -161,5 +163,52 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
         Imports a .zip file into a Project
         :param zip_file: Zip file IO.
         :return: Project recently created.
+        """
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def create_curation(self, project: Union[Project, int], document: Union[Document, int],
+                        content: IO,
+                        document_state: str = DocumentState.DEFAULT,
+                        curation_format: str = InceptionFormat.DEFAULT) -> Curation:
+        """
+        Creates a curated Document
+        :param project: Project/Id of the Project where the new Document will be created
+        :param document: Document/Id of the Document in Curation.
+        :param content: Content of the curated document.
+        :param curation_format: Curation format.
+        :param document_state: State of the Document.
+        :return: Recently created Document.
+        """
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def curations(self, project: Union[Project, int], document_state: str = InceptionFormat.DEFAULT) -> List[Document]:
+        """
+        Returns a list of curated documents
+        :param project: Project/Project id.
+        :param document_state: State of the Document.
+        :return: List
+        """
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def curation(self, project: Union[Project, int], document: Union[Document, int],
+                 curation_format: str = InceptionFormat.DEFAULT) -> bytes:
+        """
+        Exports curated document of a Project as bytes format
+        :param document: Document/Id of the Document in Curation.
+        :param curation_format: Curation format.
+        :param project: Project/Project id.
+        :return: bytes
+        """
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def delete_curation(self, project: Union[Project, int], document: Union[Document, int]) -> bool:
+        """
+        Deletes curated annotations for a document in a Project
+        :param document: Document/Id of the Document in Curation.
+        :param project: Project/Project id.
         """
         pass  # pragma: no cover

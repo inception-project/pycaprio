@@ -11,9 +11,11 @@ from pycaprio.core.mappings import NO_PROJECT
 from pycaprio.core.objects.annotation import Annotation
 from pycaprio.core.objects.document import Document
 from pycaprio.core.objects.project import Project
+from pycaprio.core.objects.curation import Curation
 from pycaprio.core.schemas.annotation import AnnotationSchema
 from pycaprio.core.schemas.document import DocumentSchema
 from pycaprio.core.schemas.project import ProjectSchema
+from pycaprio.core.schemas.curation import CurationSchema
 
 
 # Fixtures for project
@@ -119,10 +121,35 @@ def mock_io():
 
 
 @pytest.fixture
-def serializations(serialized_project, serialized_annotation, serialized_document):
-    return {'project': serialized_project, 'annotation': serialized_annotation, 'document': serialized_document}
+def serializations(serialized_project, serialized_annotation, serialized_document, serialized_curation):
+    return {'project': serialized_project, 'annotation': serialized_annotation, 'document': serialized_document,
+            'curation': serialized_curation}
 
 
 @pytest.fixture
-def deserializations(deserialized_project, deserialized_annotation, deserialized_document):
-    return {'project': deserialized_project, 'annotation': deserialized_annotation, 'document': deserialized_document}
+def deserializations(deserialized_project, deserialized_annotation, deserialized_document, deserialized_curation):
+    return {'project': deserialized_project, 'annotation': deserialized_annotation, 'document': deserialized_document,
+            'curation': deserialized_curation}
+
+
+@pytest.fixture
+def curation_schema():
+    return CurationSchema()
+
+
+@pytest.fixture
+def mock_curation_user():
+    return "test-user"
+
+
+@pytest.fixture
+def deserialized_curation(mock_project_id: int, mock_document_id: int, mock_curation_user: str,
+                          mock_document_state: str, mock_datetime_date: datetime.datetime):
+    return Curation(NO_PROJECT, NO_DOCUMENT, mock_curation_user, mock_document_state,
+                    mock_datetime_date)
+
+
+@pytest.fixture
+def serialized_curation(mock_project_id: int, mock_document_id: int, mock_curation_user: str,
+                        mock_document_state: str, mock_str_date: str):
+    return {'user': mock_curation_user, 'state': mock_document_state, 'timestamp': mock_str_date}

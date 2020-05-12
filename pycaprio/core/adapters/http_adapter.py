@@ -11,9 +11,11 @@ from pycaprio.core.mappings import DocumentState
 from pycaprio.core.objects.annotation import Annotation
 from pycaprio.core.objects.document import Document
 from pycaprio.core.objects.project import Project
+from pycaprio.core.objects.curation import Curation
 from pycaprio.core.schemas.annotation import AnnotationSchema
 from pycaprio.core.schemas.document import DocumentSchema
 from pycaprio.core.schemas.project import ProjectSchema
+from pycaprio.core.schemas.curation import CurationSchema
 
 
 class HttpInceptionAdapter(BaseInceptionAdapter):
@@ -132,6 +134,42 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
         response = self.client.post("/projects/import", files={"file": ('test/path', zip_stream)},
                                     allowed_statuses=(201, 200))
         return ProjectSchema().load(response.json()['body'], many=False)
+
+    def curations(self, project: Union[Project, int], document_state: str = InceptionFormat.DEFAULT) -> List[Document]:
+        curations_list = self.documents(project)
+        curator_list = [document for document in curations_list if
+                        document.document_state == document_state]
+        return curator_list
+
+    def curation(self, project: Union[Project, int], document: Union[Document, int],
+                 curation_format: str = InceptionFormat.DEFAULT) -> bytes:
+        project_id = self._get_object_id(project)
+        document_id = self._get_object_id(document)
+        response = self.client.get(f"/projects/{project_id}/documents/{document_id}/curation",
+                                   allowed_statuses=(200,), params={'format': curation_format})
+        return response.content
+
+    def create_curation(self, project: Union[Project, int], document: Union[Document, int],
+                        content: IO,
+                        document_state: str = DocumentState.DEFAULT,
+                        curation_format: str = InceptionFormat.DEFAULT) -> Curation:
+        project_id = self._get_object_id(project)
+        document_id = self._get_object_id(document)
+        response = self.client.post(f"/projects/{project_id}/documents/{document_id}/curation",
+                                    form_data={'format': curation_format, 'state': document_state},
+                                    files={"content": content},
+                                    allowed_statuses=(201, 200))
+        curation = CurationSchema().load(response.json()['body'], many=False)
+        curation.project_id = project_id
+        curation.document_id = document_id
+        return curation
+
+    def delete_curation(self, project: Union[Project, int], document: Union[Document, int]) -> bool:
+        project_id = self._get_object_id(project)
+        document_id = self._get_object_id(document)
+        self.client.delete(f'/projects/{project_id}/documents/{document_id}/curation',
+                           allowed_statuses=(204, 200))
+        return True
 
     @staticmethod
     def _get_object_id(o: Union[int, Project, Document, Annotation]) -> int:

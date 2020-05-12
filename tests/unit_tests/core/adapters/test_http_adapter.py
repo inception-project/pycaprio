@@ -4,11 +4,12 @@ from unittest.mock import Mock
 import pytest
 
 from pycaprio.core.adapters.http_adapter import HttpInceptionAdapter
-from pycaprio.core.objects import Project, Document, Annotation
+from pycaprio.core.objects import Project, Document, Annotation, Curation
 
 test_project = Project(1, "")
 test_document = Document(test_project.project_id, 1, "", "")
 test_annotation = Annotation(test_project.project_id, test_document.document_id, "test_user", "", None)
+test_curation = Curation(test_project.project_id, test_document.document_id, "test_user", "", None)
 
 
 @pytest.mark.parametrize('route, verb, function, parameters', [
@@ -28,7 +29,14 @@ test_annotation = Annotation(test_project.project_id, test_document.document_id,
      (test_project, test_document)),
     ('/projects/1/documents/1/annotations/test-username', 'delete', HttpInceptionAdapter.delete_annotation,
      (test_project, test_document, 'test-username')),
-    ('/projects/1/export.zip', 'get', HttpInceptionAdapter.export_project, (test_project,))
+    ('/projects/1/export.zip', 'get', HttpInceptionAdapter.export_project, (test_project,)),
+    ('/projects/1/export.zip', 'get', HttpInceptionAdapter.export_project, (test_project,)),
+    ('/projects/1/documents', 'get', HttpInceptionAdapter.curations, (1,)),
+    ('/projects/1/documents/1/curation', 'get', HttpInceptionAdapter.curation, (1, 1)),
+    ('/projects/1/documents/1/curation', 'delete', HttpInceptionAdapter.delete_curation, (1, 1)),
+    ('/projects/1/documents', 'get', HttpInceptionAdapter.curations, (test_project,)),
+    ('/projects/1/documents/1/curation', 'get', HttpInceptionAdapter.curation, (test_project, test_document)),
+    ('/projects/1/documents/1/curation', 'delete', HttpInceptionAdapter.delete_curation, (test_project, test_document))
 ])
 def test_list_resources_gets_good_route(route, verb, function, parameters, mock_http_adapter: HttpInceptionAdapter):
     function(mock_http_adapter, *parameters)
@@ -41,7 +49,9 @@ def test_list_resources_gets_good_route(route, verb, function, parameters, mock_
     ('/projects/1/documents/1/annotations', 'get', HttpInceptionAdapter.annotations, (1, 1)),
     ('/projects', 'get', HttpInceptionAdapter.projects, ()),
     ('/projects/1/documents', 'get', HttpInceptionAdapter.documents, (test_project,)),
-    ('/projects/1/documents/1/annotations', 'get', HttpInceptionAdapter.annotations, (test_project, test_document))
+    ('/projects/1/documents/1/annotations', 'get', HttpInceptionAdapter.annotations, (test_project, test_document)),
+    ('/projects/1/documents', 'get', HttpInceptionAdapter.curations, (1,)),
+    ('/projects/1/documents', 'get', HttpInceptionAdapter.curations, (test_project,))
 ])
 def test_list_resources_returns_list(route, verb, function, parameters, mock_http_adapter: HttpInceptionAdapter):
     resource_list = function(mock_http_adapter, *parameters)
@@ -73,7 +83,11 @@ def test_import_project_returns_project(mock_http_adapter: HttpInceptionAdapter,
                           ('/projects/1/documents/1', HttpInceptionAdapter.document, (test_project, test_document),
                            'document'),
                           ('/projects/1/documents/1/annotations/test-user', HttpInceptionAdapter.annotation,
-                           (test_project, test_document, 'test-user'), 'annotation')
+                           (test_project, test_document, 'test-user'), 'annotation'),
+                          ('/projects/1/documents/1/curation', HttpInceptionAdapter.curation,
+                           (1, 1), 'curation'),
+                          ('/projects/1/documents/1/curation', HttpInceptionAdapter.curation,
+                           (test_project, test_document), 'curation')
                           ])
 def test_get_single_resource_route_ok(route: str, function: callable, params: tuple, resource: dict,
                                       mock_http_adapter: HttpInceptionAdapter, mock_http_response: Mock,
@@ -95,7 +109,9 @@ def test_get_project_returns_good_instance(mock_http_adapter: HttpInceptionAdapt
 @pytest.mark.parametrize('function, params', [('document', (1, 1)),
                                               ('annotation', (1, 1, 'test-username')),
                                               ('document', (test_project, test_document)),
-                                              ('annotation', (test_project, test_document, 'test-username'))
+                                              ('annotation', (test_project, test_document, 'test-username')),
+                                              ('curation', (1, 1)),
+                                              ('curation', (test_project, test_document))
                                               ])
 def test_resource_returns_bytes(mock_http_adapter: HttpInceptionAdapter, mock_http_response: Mock, function: str,
                                 params: tuple):
@@ -115,7 +131,11 @@ def test_resource_returns_bytes(mock_http_adapter: HttpInceptionAdapter, mock_ht
                            (test_project, "test-name", None,),
                            'document'),
                           ('/projects/1/documents/1/annotations/test-user', HttpInceptionAdapter.create_annotation,
-                           (test_project, test_document, "test-user", None,), 'annotation')
+                           (test_project, test_document, "test-user", None,), 'annotation'),
+                          ('/projects/1/documents/1/curation', HttpInceptionAdapter.create_curation,
+                           (1, 1, None,), 'annotation'),
+                          ('/projects/1/documents/1/curation', HttpInceptionAdapter.create_curation,
+                           (test_project, test_document, None,), 'annotation')
                           ])
 def test_resource_creation_good_route(route: str, function: callable, params: tuple, resource: str,
                                       mock_http_adapter: HttpInceptionAdapter, mock_http_response: Mock,
@@ -136,7 +156,9 @@ def test_resource_creation_good_route(route: str, function: callable, params: tu
                            (test_project, "test-name", None,),
                            'document'),
                           ('/projects/1/documents/1/annotations/test-user', HttpInceptionAdapter.create_annotation,
-                           (test_project, test_document, "test-user", None,), 'annotation')
+                           (test_project, test_document, "test-user", None,), 'annotation'),
+                          ('/projects/1/documents/1/curation', HttpInceptionAdapter.create_curation,
+                           (test_project, test_document, "document_state", "curation_format"), 'curation')
                           ])
 def test_resource_creation_returns_resource_instance(route: str, function: callable, params: tuple, resource: str,
                                                      mock_http_adapter: HttpInceptionAdapter, mock_http_response: Mock,
@@ -202,6 +224,26 @@ def test_annotation_has_document_id_injected_creation(mock_http_adapter: HttpInc
     mock_http_response.json.return_value = {'body': serialized_annotation}
     mock_http_adapter.client.post.return_value = mock_http_response
     response = mock_http_adapter.create_annotation(test_project_id, test_document_id, "test-name", None)
+    assert response.document_id == test_document_id
+
+
+def test_curation_has_project_id_injected_creation(mock_http_adapter: HttpInceptionAdapter,
+                                                   mock_http_response: Mock, serialized_curation: dict):
+    test_project_id = 1
+    test_document_id = 2
+    mock_http_response.json.return_value = {'body': serialized_curation}
+    mock_http_adapter.client.post.return_value = mock_http_response
+    response = mock_http_adapter.create_curation(test_project_id, test_document_id, "test-state", "test-format")
+    assert response.project_id == test_project_id
+
+
+def test_curation_has_document_id_injected_creation(mock_http_adapter: HttpInceptionAdapter,
+                                                    mock_http_response: Mock, serialized_curation: dict):
+    test_project_id = 1
+    test_document_id = 2
+    mock_http_response.json.return_value = {'body': serialized_curation}
+    mock_http_adapter.client.post.return_value = mock_http_response
+    response = mock_http_adapter.create_curation(test_project_id, test_document_id, "test-state", "test-format")
     assert response.document_id == test_document_id
 
 
