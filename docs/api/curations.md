@@ -81,16 +81,20 @@ You need to specify `content` which depends on the annotation format specified i
 
 To curate a document outside of INCEpTION or to simply change the status of a document into a curator status, you could do the following:
 
- ```python
+```python
+
 from pycaprio.mappings import InceptionFormat
 # Get the annotations or a specific document as e.g. binary CAS
 file = client.api.annotation(1, 4, 'test-user', curation_format=InceptionFormat.BIN)
 # The below function then uploads the file with the new status
 client.api.create_curation(1, 4, curation_format = InceptionFormat.BIN, content =  annotations, document_state = DocumentState.CURATION_IN_PROGRESS)
+
 ```
 
 XMI format also works, but one has to unzip the file first and import only the plain XMI file
- ```python
+
+```python
+
 from pycaprio.mappings import InceptionFormat
 annotation_content = client.api.annotation(1, 4, 'test-user', curation_format=InceptionFormat.XMI)
 z = zipfile.ZipFile(io.BytesIO(annotations))
@@ -99,6 +103,7 @@ with open('/path/to/folder/file.xmi', 'rb') as f:
     file = f.read()
 # The below function then uploads the file with the new status
 client.api.create_curation(1, 4, curation_format = InceptionFormat.XMI, content =  file, document_state = DocumentState.CURATION_IN_PROGRESS)
+
 ```
 
 ### Delete curations
@@ -111,6 +116,8 @@ You can provide a `Document` instance instead of a `document_id` as well.
 Example:
 
 ```python
+
 client.api.delete_curation(1,4) # Deletes curated document #4 from project #1
+
 ```
 

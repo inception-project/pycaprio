@@ -7,6 +7,7 @@ nav:
           - Projects: 'api/projects.md'
           - Documents: 'api/documents.md'
           - Annotations: 'api/annotations.md'
+          - Curations: 'api/curations.md'
           - Formats: 'api/formats.md'
     - Tests: 'tests.md'
     - License: 'license.md'
