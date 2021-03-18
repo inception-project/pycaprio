@@ -2,7 +2,7 @@
 name = "pycaprio"
 version = "0.2.1"
 description = "Python client for the INCEpTION annotation tool API"
-authors = ["Savanamed"]
+authors = ["Javier Luna Molina", "Savanamed"]
 license = "MIT"
 packages = [
     { include = "pycaprio" },
