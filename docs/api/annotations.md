@@ -53,7 +53,7 @@ Example:
 ```python
 from pycaprio.mappings import InceptionFormat, AnnotationState
 with open("annotation", 'rb') as annotation_file:
-    new_annotation = client.api.create_annotation(1, 4, 'leonardo-dicaprio', annotation_file, annotation_format=InceptionFormat.WEBANNO, annotation_state=AnnotationState.ANNOTATION_IN_PROGRESS)
+    new_annotation = client.api.create_annotation(1, 4, 'leonardo-dicaprio', annotation_file, annotation_format=InceptionFormat.WEBANNO, annotation_state=AnnotationState.IN_PROGRESS)
 print(new_annotation) # <Annotation by leonardo-dicaprio (Project: 1, Document: 4)>
 ```
 
@@ -68,4 +68,20 @@ Example:
 
 ```python
 client.api.delete_annotation(1, 4, 'leonardo-dicaprio') # Deletes annotation made by leonardo-dicaprio on document #4 from project #1
+```
+
+### Update annotation state
+Updates the state of an annotation. Requires INCEpTION 0.19.0+.
+
+**Note**: This endpoint is not AERO compliant, meaning this could not work in other AERO-compatible annotation tools.
+
+You can provide a `Project` instance instead of a `project_id` as well.
+You can provide a `Document` instance instead of a `document_id` as well.
+
+
+Example:
+
+```python
+from pycaprio.mappings import AnnotationState
+client.api.update_annotation_state(1, 4, 'leonardo-dicaprio', AnnotationState.LOCKED) # Updates the state to 'LOCKED'
 ```
