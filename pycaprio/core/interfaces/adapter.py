@@ -121,6 +121,18 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
         pass  # pragma: no cover
 
     @abstractmethod
+    def update_annotation_state(self, project: Union[Project, int], document: Union[Document, int], user_name: str,
+                                annotation_state: str) -> bool:
+        """
+        Updates the state of an annotation
+        :param project: Project/Id of the Project where the Annotation is
+        :param document: Document/Id of the Document in which the annotation is.
+        :param user_name: Annotator's username.
+        :param annotation_state: New state of the Annotation.
+        """
+        pass  # pragma: no cover
+
+    @abstractmethod
     def delete_project(self, project: Union[Project, int]) -> bool:
         """
         Deletes Project.

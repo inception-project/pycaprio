@@ -3,6 +3,7 @@ from unittest.mock import Mock
 
 import pytest
 
+from pycaprio.mappings import AnnotationState
 from pycaprio.core.adapters.http_adapter import HttpInceptionAdapter
 from pycaprio.core.objects import Project, Document, Annotation, Curation
 
@@ -36,7 +37,9 @@ test_curation = Curation(test_project.project_id, test_document.document_id, "te
     ('/projects/1/documents/1/curation', 'delete', HttpInceptionAdapter.delete_curation, (1, 1)),
     ('/projects/1/documents', 'get', HttpInceptionAdapter.curations, (test_project,)),
     ('/projects/1/documents/1/curation', 'get', HttpInceptionAdapter.curation, (test_project, test_document)),
-    ('/projects/1/documents/1/curation', 'delete', HttpInceptionAdapter.delete_curation, (test_project, test_document))
+    ('/projects/1/documents/1/curation', 'delete', HttpInceptionAdapter.delete_curation, (test_project, test_document)),
+    ('/projects/1/documents/1/annotations/test-username/state', 'post', HttpInceptionAdapter.update_annotation_state,
+     (test_project, test_document, 'test-username', AnnotationState.IN_PROGRESS))
 ])
 def test_list_resources_gets_good_route(route, verb, function, parameters, mock_http_adapter: HttpInceptionAdapter):
     function(mock_http_adapter, *parameters)

@@ -106,6 +106,16 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
         annotation.document_id = document_id
         return annotation
 
+    def update_annotation_state(self, project: Union[Project, int], document: Union[Document, int], user_name: str,
+                                annotation_state: str) -> bool:
+        project_id = self._get_object_id(project)
+        document_id = self._get_object_id(document)
+
+        self.client.post(f"/projects/{project_id}/documents/{document_id}/annotations/{user_name}/state",
+                         form_data={'state': annotation_state},
+                         allowed_statuses=(200,))
+        return True
+
     def delete_project(self, project: Union[Project, int]) -> bool:
         project_id = self._get_object_id(project)
         self.client.delete(f'/projects/{project_id}', allowed_statuses=(204, 200,))
