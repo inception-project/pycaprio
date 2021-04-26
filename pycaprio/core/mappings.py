@@ -6,32 +6,42 @@ NO_DOCUMENT = -1
 class InceptionFormat:
     DEFAULT = 'text'
 
-    BIN = 'bin'
     CONLL2000 = 'conll2000'
     CONLL2006 = 'conll2006'
     CONLL2009 = 'conll2009'
     CONLLCORENLP = 'conllcorenlp'
     CONLLU = 'conllu'
-    CTSV = 'ctsv'
-    CTSV3 = 'ctsv3'
-    DKPRO_CORE_TEI = 'dkpro-core-tei'
-    TEI = 'dkpro-core-tei'
-    HTML = 'html'
+
+    WEBANNO_TSV_1 = 'tsv'
+    WEBANNO_TSV_2 = 'ctsv'
+    WEBANNO_TSV_3 = 'ctsv3'
+    WEBANNO = WEBANNO_TSV_3
+    TSV = WEBANNO_TSV_3
+
+    HTML_LEGACY = 'html'
+    HTML = 'htmldoc'
+
     LIF = 'lif'
     NIF = 'nif'
     PDF = 'pdf'
-    PERSEUS_2_1 = 'perseus_2.1'
     PUBANNOTATION_SECTIONS = 'pubannotation-sections'
     TCF = 'tcf'
+
+    PERSEUS_2_1 = 'perseus_2.1'
+    PERSEUS = PERSEUS_2_1
+
     TEXT = 'text'
-    TEXTLINES = 'textlines'
-    TSV = 'tsv'
+    TEXT_SENTENCE_PER_LINE = 'textlines'
+    TEXT_PRETOKENIZED_SENTENCE_PER_LINE = 'pretokenized-textlines'
 
-    XMI = 'xmi'
+    DKPRO_CORE_TEI = 'dkpro-core-tei'
+    TEI = DKPRO_CORE_TEI
 
-    PERSEUS = 'perseus_2.1'
-    WEBANNO = 'tsv'
-    JSON = 'json'
+    UIMA_CAS_BINARY = 'bin'
+    UIMA_CAS_JSON = 'json'
+    UIMA_CAS_XMI_XML_1_0 = 'xmi'
+    UIMA_CAS_XMI_XML_1_1 = 'xmi-xml1.1'
+    UIMA_CAS_XMI = UIMA_CAS_XMI_XML_1_0
 
 
 class AnnotationState:

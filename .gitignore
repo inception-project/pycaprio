@@ -45,3 +45,5 @@ coverage.xml
 
 # poetry lock
 poetry.lock
+.idea
+venv
