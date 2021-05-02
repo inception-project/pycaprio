@@ -9,7 +9,7 @@ Here are a few guidelines and "How to"s that will help you with the contribution
 Take a moment to search through `pycaprio`'s [issues](https://github.com/JavierLuna/pycaprio/issues) to check whether the
 bug you are experiencing or the feature you would want implemented are being discussed.
 
-Please check out the [Code of Conduct](https://github.com/JavierLuna/pycaprio/blob/master/CODE_OF_CONDUCT.md) for this repository.
+Please check out the [Code of Conduct](https://github.com/JavierLuna/pycaprio/blob/main/CODE_OF_CONDUCT.md) for this repository.
 This Code of Conduct is adapted from the Contributor Covenant, version 2.0, available at http://contributor-covenant.org/version/2/0/code_of_conduct/
 
 Lastly, please remember that I am a human as well. I will get back to you whenever I have time, be patient if I don't reply in a couple of days or three.
@@ -36,7 +36,7 @@ Fork the repository into your account and clone it in your work station.
 
 To work on `pycaprio`, you will need Python 3.6+ and [Poetry](https://github.com/python-poetry/poetry) installed.
 
-There's a [Makefile](https://github.com/JavierLuna/pycaprio/blob/master/Makefile) to make your dev life easier, but if you cannot run `make` in your system, just open the file and do the same commands.
+There's a [Makefile](https://github.com/JavierLuna/pycaprio/blob/main/Makefile) to make your dev life easier, but if you cannot run `make` in your system, just open the file and do the same commands.
 
 
 ### Installing the dependencies
@@ -59,7 +59,7 @@ To run the linter: `make lint`
 
 ### Documentation
 
-There's a [docs](https://github.com/JavierLuna/pycaprio/tree/master/docs) directory that contains all `pycaprio`'s documentation.
+There's a [docs](https://github.com/JavierLuna/pycaprio/tree/main/docs) directory that contains all `pycaprio`'s documentation.
 
 You may add/change the files there if your contribution requires so.
 
