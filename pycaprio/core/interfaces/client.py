@@ -6,7 +6,6 @@ from urllib.parse import urlparse
 import requests
 
 from pycaprio.core.interfaces.types import authentication_type
-from pycaprio.core.interfaces.types import status_list_type
 
 
 class BaseInceptionClient(metaclass=ABCMeta):
@@ -34,55 +33,41 @@ class BaseInceptionClient(metaclass=ABCMeta):
         return f"{self.inception_host}{self.INCEPTION_API_PATH}{relative_url}"
 
     @abstractmethod
-    def get(self, url: str, data: Optional[dict],
-            allowed_statuses: Optional[status_list_type] = None) -> requests.Response:
+    def get(self, url: str, data: Optional[dict]) -> requests.Response:
         """
         Issues an authenticated GET request to Inception
         :param url: relative url to make request
         :param data: Parameters to include in the request
-        :param allowed_statuses: Tuple of allowed statuses.
-        If the response's status code is not in the list, a BadInceptionResponse exception will be risen.
-        None allows all status codes
         :return: Response
         """
         pass  # pragma: no cover
 
     @abstractmethod
-    def post(self, url: str, json: dict, files: dict,
-             allowed_statuses: Optional[status_list_type] = None) -> requests.Response:
+    def post(self, url: str, json: dict, files: dict) -> requests.Response:
         """
         Issues an authenticated POST request to Inception
         :param url: relative url to make request
         :param json: JSON body
         :param files: Files to be uploaded.
-        :param allowed_statuses: Tuple of allowed statuses.
-        If the response's status code is not in the list, a BadInceptionResponse exception will be risen.
-        None allows all status codes
         :return: Response
         """
         pass  # pragma: no cover
 
     @abstractmethod
-    def delete(self, url: str, allowed_statuses: Optional[status_list_type] = None) -> requests.Response:
+    def delete(self, url: str) -> requests.Response:
         """
         Issues an authenticated DELETE request to Inception
         :param url: relative url to make request
-        :param allowed_statuses: Tuple of allowed statuses.
-        If the response's status code is not in the list, a BadInceptionResponse exception will be risen.
-        None allows all status codes
         :return: Response
         """
         pass  # pragma: no cover
 
     @abstractmethod
-    def request(self, method: str, url: str, allowed_statuses: Optional[status_list_type],
+    def request(self, method: str, url: str,
                 **kwargs) -> requests.Response:
         """
         Issues an authenticated request to Inception
         :param url: relative url to make request
-        :param allowed_statuses: Tuple of allowed statuses.
-        If the response's status code is not in the list, a BadInceptionResponse exception will be risen.
-        None allows all status codes
         :return: Response
         """
         pass  # pragma: no cover

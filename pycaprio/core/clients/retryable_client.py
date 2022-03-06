@@ -1,70 +1,75 @@
+import io
+import time
 from typing import Optional
 
 import requests
-from tenacity import RetryError
-from tenacity import retry
-from tenacity import retry_if_exception_type
-from tenacity import stop_after_attempt
+from requests_toolbelt import MultipartEncoder
 
 from pycaprio.core.exceptions import InceptionBadResponse
 from pycaprio.core.interfaces.client import BaseInceptionClient
-from pycaprio.core.clients.exceptions import RetryableException
 from pycaprio.core.interfaces.types import authentication_type
-from pycaprio.core.interfaces.types import status_list_type
 
 
 class RetryableInceptionClient(BaseInceptionClient):
     """
-    HTTP client which implements retrying by default.
+    HTTP client which implements retrying with exponential backoff.
     Documentation is described in 'BaseInceptionClient'.
     """
-    MAX_RETRY_ATTEMPTS = 5
-    NO_RETRY_STATUSES = (404, 401, 403)
+    RETRY_STATUSES = (408, 502, 503, 504)
 
-    def __init__(self, inception_host: str, authentication: authentication_type):
+    def __init__(self, inception_host: str, authentication: authentication_type, max_retries=3):
         super().__init__(inception_host, authentication)
         self.session = requests.Session()
         self.session.auth = authentication
+        assert 0 < max_retries, "max_retries must be greater than 0"
+        self.max_retries = max_retries
 
-    def get(self, url: str, params: Optional[dict] = None,
-            allowed_statuses: Optional[status_list_type] = None) -> requests.Response:
-        return self.request('get', url, allowed_statuses, params=params)
+    def get(self, url: str, params: Optional[dict] = None) -> requests.Response:
+        return self.request('get', url, params=params)
 
-    def post(self, url: str, data: Optional[dict] = None, form_data: Optional[dict] = None, json: Optional[dict] = None,
-             files: Optional[dict] = None,
-             allowed_statuses: Optional[status_list_type] = None) -> requests.Response:
-        if form_data:
-            files = files or {}
-            for k, v in form_data.items():
-                files[k] = (None, v)
-        return self.request('post', url, allowed_statuses, data=data, json=json, files=files)
+    def post(self, url: str, data: Optional[dict] = None, form_data: Optional[dict] = None,
+             files: Optional[dict] = None) -> requests.Response:
+        return self.request('post', url, data=data, form_data=form_data, files=files)
 
-    def delete(self, url: str, allowed_statuses: Optional[status_list_type] = None) -> requests.Response:
-        return self.request('delete', url, allowed_statuses)
+    def delete(self, url: str) -> requests.Response:
+        return self.request('delete', url)
 
-    def request(self, method: str, url: str, allowed_statuses: Optional[status_list_type],
-                **kwargs) -> requests.Response:
-        try:
-            return self._request(method, url, allowed_statuses, **kwargs)
-        except RetryError as retry_error:
-            raise InceptionBadResponse(retry_error.last_attempt._exception.bad_response)
+    def request(self, method: str, url: str, **kwargs) -> requests.Response:
+        retries = 0
+        retry = False
+        last_error = None
 
-    @retry(retry=retry_if_exception_type(RetryableException), stop=stop_after_attempt(MAX_RETRY_ATTEMPTS))
-    def _request(self, method: str, url: str, allowed_statuses: Optional[status_list_type],
+        while (retry and retries < self.max_retries) or retries == 0:
+            time.sleep((2 ** retries) / 10)
+            try:
+                return self._request(method, url, **kwargs)
+            except InceptionBadResponse as bad_response_error:
+                last_error = bad_response_error
+                retry = method == 'get' and bad_response_error.status_code in self.RETRY_STATUSES
+
+            retries += 1
+        raise last_error
+
+    def _request(self, method: str, url: str, form_data: Optional[dict] = None, files: Optional[dict] = None,
                  **kwargs) -> requests.Response:
-
+        form_data = form_data or {}
+        files = files or {}
         url = self.build_url(url)
+        if files:
+            # Rewind file's IO streams
+            if file_content := files.get("content"):
+                _, io_stream = file_content
+                io_stream.seek(0, io.SEEK_SET)
 
-        allowed_statuses = allowed_statuses or tuple()
-        response = self.session.request(method, url, **kwargs)
-
-        # Retry if status code is retryable and not allowed
-        status_code_is_retryable = response.status_code not in self.NO_RETRY_STATUSES
-        status_code_is_not_allowed = allowed_statuses and (response.status_code not in allowed_statuses)
-
-        if status_code_is_retryable and status_code_is_not_allowed:
-            raise RetryableException(response)
-        elif status_code_is_not_allowed:
+        if form_data or files:  # Correctly encode multiform data
+            multipart_encoder = MultipartEncoder(
+                fields={**form_data, **files}
+            )
+            response = self.session.request(method, url, data=multipart_encoder,
+                                            headers={'Content-Type': multipart_encoder.content_type})
+        else:
+            response = self.session.request(method, url, **kwargs)
+        if 200 <= response.status_code < 300:
+            return response
+        else:
             raise InceptionBadResponse(response)
-
-        return response
