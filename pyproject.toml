@@ -11,7 +11,7 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.6"
 requests = "*"
-tenacity = "^5.1"
+requests-toolbelt = "^0.9.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"

@@ -26,23 +26,5 @@ pycaprio_client.api.create_project("Project name", "creator-username")
 
 Check the [documentation](https://pycaprio.readthedocs.io) if you want to know more.
 
-## Current state of Pycaprio
-Hi! I'm Javier and I am the maintainer of `pycaprio`.
-I developed this library when I was working at [Savanamed](https://github.com/Savanamed) where I pushed for it to be open sourced
-so the research community could also use INCEpTION's API a bit easier.
-
-While I don't work for the company anymore, I'd like to continue maintaining this project.
-Pycaprio is MIT licensed, so I created this fork and continue my work, but the `pycaprio` PyPi package is still owned by Savana.
-
-Now, I don't want to just create a "pycaprio2" and tell you to update, so I've asked Savanamed for an ownership transfer of that package.
-That will mean you can use the project as always and I can keep on maintaining it. That's a fair deal!
-
-However, as the spanish proverb says, "Las cosas de palacio van despacio"/"Things at the palace go slowly" so
-expect a bit of delay on that ownership transfer. I'll keep you posted.
-
-Thank you for using the project!
-
-Javier
-
 ## License
 Pycaprio is under the MIT license. Check it out [here](https://opensource.org/licenses/MIT)

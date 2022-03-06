@@ -4,6 +4,7 @@ from typing import Optional
 
 from pycaprio.core.clients.retryable_client import RetryableInceptionClient
 from pycaprio.core.interfaces.adapter import BaseInceptionAdapter
+from pycaprio.core.interfaces.client import BaseInceptionClient
 from pycaprio.core.interfaces.types import authentication_type
 from pycaprio.core.mappings import AnnotationState
 from pycaprio.core.mappings import InceptionFormat
@@ -24,12 +25,13 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
     Documentation is described in the 'BaseInceptionAdapter' class.
     """
 
-    def __init__(self, inception_host: str, authentication: authentication_type):
-        self.client = RetryableInceptionClient(inception_host, authentication)
+    def __init__(self, inception_host: str, authentication: authentication_type,
+                 inception_client: Optional[BaseInceptionClient] = None):
+        self.client = inception_client or RetryableInceptionClient(inception_host, authentication)
         self.default_username, _ = authentication
 
     def projects(self) -> List[Project]:
-        response = self.client.get('/projects', allowed_statuses=(200,))
+        response = self.client.get('/projects')
         return ProjectSchema().load(response.json()['body'], many=True)
 
     def project(self, project: Union[Project, int]) -> Project:
@@ -39,7 +41,7 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
 
     def documents(self, project: Union[Project, int]) -> List[Document]:
         project_id = self._get_object_id(project)
-        response = self.client.get(f'/projects/{project_id}/documents', allowed_statuses=(200,))
+        response = self.client.get(f'/projects/{project_id}/documents')
         document_list = DocumentSchema().load(response.json()['body'], many=True)
         for document in document_list:
             document.project_id = project_id
@@ -49,15 +51,14 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
                  document_format: str = InceptionFormat.DEFAULT) -> bytes:
         project_id = self._get_object_id(project)
         document_id = self._get_object_id(document)
-        response = self.client.get(f'/projects/{project_id}/documents/{document_id}', allowed_statuses=(200,),
+        response = self.client.get(f'/projects/{project_id}/documents/{document_id}',
                                    params={'format': document_format})
         return response.content
 
     def annotations(self, project: Union[Project, int], document: Union[Document, int]) -> List[Annotation]:
         project_id = self._get_object_id(project)
         document_id = self._get_object_id(document)
-        response = self.client.get(f'/projects/{project_id}/documents/{document_id}/annotations',
-                                   allowed_statuses=(200,))
+        response = self.client.get(f'/projects/{project_id}/documents/{document_id}/annotations')
         annotation_list = AnnotationSchema().load(response.json()['body'], many=True)
         for annotation in annotation_list:
             annotation.project_id = project_id
@@ -69,13 +70,12 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
         project_id = self._get_object_id(project)
         document_id = self._get_object_id(document)
         response = self.client.get(f'/projects/{project_id}/documents/{document_id}/annotations/{user_name}',
-                                   allowed_statuses=(200,), params={'format': annotation_format})
+                                   params={'format': annotation_format})
         return response.content
 
     def create_project(self, project_name: str, creator_name: Optional[str] = None) -> Project:
         creator_name = creator_name or self.default_username
-        response = self.client.post('/projects', form_data={'creator': creator_name, 'name': project_name},
-                                    allowed_statuses=(201,))
+        response = self.client.post('/projects', data={'creator': creator_name, 'name': project_name})
         return ProjectSchema().load(response.json()['body'])
 
     def create_document(self, project: Union[Project, int], document_name: str, content: IO,
@@ -85,8 +85,7 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
         response = self.client.post(f"/projects/{project_id}/documents", form_data={"name": document_name,
                                                                                     "format": document_format,
                                                                                     "state": document_state},
-                                    files={"content": ('test/path', content)},
-                                    allowed_statuses=(201, 200))
+                                    files={"content": ('test/path', content)})
         document = DocumentSchema().load(response.json()['body'], many=False)
         document.project_id = project_id
         return document
@@ -99,8 +98,7 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
         document_id = self._get_object_id(document)
         response = self.client.post(f"/projects/{project_id}/documents/{document_id}/annotations/{user_name}",
                                     form_data={'format': annotation_format, 'state': annotation_state},
-                                    files={"content": ('test/path', content)},
-                                    allowed_statuses=(201, 200))
+                                    files={"content": ('test/path', content)})
         annotation = AnnotationSchema().load(response.json()['body'], many=False)
         annotation.project_id = project_id
         annotation.document_id = document_id
@@ -112,37 +110,34 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
         document_id = self._get_object_id(document)
 
         self.client.post(f"/projects/{project_id}/documents/{document_id}/annotations/{user_name}/state",
-                         form_data={'state': annotation_state},
-                         allowed_statuses=(200,))
+                         form_data={'state': annotation_state})
         return True
 
     def delete_project(self, project: Union[Project, int]) -> bool:
         project_id = self._get_object_id(project)
-        self.client.delete(f'/projects/{project_id}', allowed_statuses=(204, 200,))
+        self.client.delete(f'/projects/{project_id}')
         return True
 
     def delete_document(self, project: Union[Project, int], document: Union[Document, int]) -> bool:
         project_id = self._get_object_id(project)
         document_id = self._get_object_id(document)
-        self.client.delete(f'/projects/{project_id}/documents/{document_id}', allowed_statuses=(204, 200))
+        self.client.delete(f'/projects/{project_id}/documents/{document_id}')
         return True
 
     def delete_annotation(self, project: Union[Project, int], document: Union[Document, int], user_name: str) -> bool:
         project_id = self._get_object_id(project)
         document_id = self._get_object_id(document)
-        self.client.delete(f'/projects/{project_id}/documents/{document_id}/annotations/{user_name}',
-                           allowed_statuses=(204, 200))
+        self.client.delete(f'/projects/{project_id}/documents/{document_id}/annotations/{user_name}')
         return True
 
     def export_project(self, project: Union[Project, int], project_format: str = InceptionFormat.DEFAULT) -> bytes:
         project_id = self._get_object_id(project)
-        response = self.client.get(f"/projects/{project_id}/export.zip", allowed_statuses=(200,),
+        response = self.client.get(f"/projects/{project_id}/export.zip",
                                    params={'format': project_format})
         return response.content
 
     def import_project(self, zip_stream: IO) -> Project:
-        response = self.client.post("/projects/import", files={"file": ('test/path', zip_stream)},
-                                    allowed_statuses=(201, 200))
+        response = self.client.post("/projects/import", files={"file": ('test/path', zip_stream)})
         return ProjectSchema().load(response.json()['body'], many=False)
 
     def curations(self, project: Union[Project, int], document_state: str = InceptionFormat.DEFAULT) -> List[Document]:
@@ -156,7 +151,7 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
         project_id = self._get_object_id(project)
         document_id = self._get_object_id(document)
         response = self.client.get(f"/projects/{project_id}/documents/{document_id}/curation",
-                                   allowed_statuses=(200,), params={'format': curation_format})
+                                   params={'format': curation_format})
         return response.content
 
     def create_curation(self, project: Union[Project, int], document: Union[Document, int],
@@ -167,8 +162,7 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
         document_id = self._get_object_id(document)
         response = self.client.post(f"/projects/{project_id}/documents/{document_id}/curation",
                                     form_data={'format': curation_format, 'state': document_state},
-                                    files={"content": content},
-                                    allowed_statuses=(201, 200))
+                                    files={"content": content})
         curation = CurationSchema().load(response.json()['body'], many=False)
         curation.project_id = project_id
         curation.document_id = document_id
@@ -177,8 +171,7 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
     def delete_curation(self, project: Union[Project, int], document: Union[Document, int]) -> bool:
         project_id = self._get_object_id(project)
         document_id = self._get_object_id(document)
-        self.client.delete(f'/projects/{project_id}/documents/{document_id}/curation',
-                           allowed_statuses=(204, 200))
+        self.client.delete(f'/projects/{project_id}/documents/{document_id}/curation')
         return True
 
     @staticmethod
