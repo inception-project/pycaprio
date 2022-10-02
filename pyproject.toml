@@ -24,6 +24,9 @@ mkdocs = "^1.0"
 pytest-cov = "^2.7"
 bump2version = "^0.5.11"
 
+[tool.poetry.group.dev.dependencies]
+Jinja2 = "3.0.0"
+
 [tool.black]
 line-length = 120
 target_version = ['py36']
