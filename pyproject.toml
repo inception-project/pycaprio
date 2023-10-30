@@ -9,9 +9,9 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.11"
 requests = "*"
-tenacity = "^5.1"
+tenacity = "^8.2.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
