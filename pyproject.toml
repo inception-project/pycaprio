@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pycaprio"
-version = "0.3.0"
+version = "0.3.0-dev"
 readme = "README.md"
 # homepage = "https://github.com/inception-project/pycaprio"
 repository = "https://github.com/inception-project/pycaprio"
