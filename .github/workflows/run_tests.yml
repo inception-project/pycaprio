@@ -26,6 +26,13 @@ jobs:
         make dependencies
     - name: Lint with flake8
       run: make lint
+    - name: Deploy INCEpTION for integration tests
+      run: |
+        docker pull ghcr.io/inception-project/inception:latest
+        docker run \
+          -e JAVA_OPTS="-Dsecurity.default-admin-username=test-remote -Dsecurity.default-admin-password='{bcrypt}$2a$12$fQ.9x17xCGbrGtvw45H20uMqbEjhLIPfoa13bLfM33e./nVuNvCWa' -Dsecurity.default-admin-remote-access=true" \
+          -p8080:8080 \
+          ghcr.io/inception-project/inception:latest
     - name: Run tests
       run: make coverage
 
