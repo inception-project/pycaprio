@@ -44,6 +44,5 @@ coverage.xml
 .mypy_cache/
 
 # poetry lock
-poetry.lock
 .idea
 venv
