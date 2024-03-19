@@ -34,7 +34,7 @@ jobs:
       timeout-minutes: 5
       run: |
         docker pull ghcr.io/inception-project/inception:latest
-        docker --name inception run -d \
+        docker run --name inception -d \
           -e JAVA_OPTS='-Dremote-api.enabled=true -Dsecurity.default-admin-username=test-remote -Dsecurity.default-admin-password={bcrypt}\$2a\$12\$fQ.9x17xCGbrGtvw45H20uMqbEjhLIPfoa13bLfM33e./nVuNvCWa -Dsecurity.default-admin-remote-access=true' \
           -p8080:8080 \
           ghcr.io/inception-project/inception:latest
