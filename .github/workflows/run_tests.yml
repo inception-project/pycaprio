@@ -31,23 +31,26 @@ jobs:
       run: make lint
 
     - name: Deploy INCEpTION for integration tests
-      timeout-minutes: 5
       run: |
         docker pull ghcr.io/inception-project/inception:latest
         docker run --name inception -d \
           -e JAVA_OPTS='-Dremote-api.enabled=true -Dsecurity.default-admin-username=test-remote -Dsecurity.default-admin-password={bcrypt}\$2a\$12\$fQ.9x17xCGbrGtvw45H20uMqbEjhLIPfoa13bLfM33e./nVuNvCWa -Dsecurity.default-admin-remote-access=true' \
           -p8080:8080 \
           ghcr.io/inception-project/inception:latest
+    - name: Wait for INCEpTION to have started
+      timeout-minutes: 5
+      run: |
         while true; do
           response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/actuator/health)
+          echo "Checking if service is available... $response"
           if [ "$response" -eq 200 ]; then
             health=$(curl -s http://localhost:8080/actuator/health)
+            echo "Checking if service is healthy... health"
             if [[ "$health" == *"\"status\":\"UP\""* ]]; then
               echo "Service is healthy."
               break
             fi
           fi
-          echo "Waiting for service to become healthy..."
           sleep 5
         done
     - name: Run tests
