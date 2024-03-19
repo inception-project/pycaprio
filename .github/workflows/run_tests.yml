@@ -8,6 +8,18 @@ on:
 
 jobs:
   build:
+    services:
+      inception:
+        image: ghcr.io/inception-project/inception:latest
+        env:
+          JAVA_OPTS: '-Dremote-api.enabled=true -Dsecurity.default-admin-username=test-remote -Dsecurity.default-admin-password={bcrypt}\$2a\$12\$fQ.9x17xCGbrGtvw45H20uMqbEjhLIPfoa13bLfM33e./nVuNvCWa -Dsecurity.default-admin-remote-access=true'
+        ports:
+          8080:8080
+        options: >-
+          --health-cmd "curl -m 5 --silent --fail --request GET http://localhost:8080/actuator/health | jq --exit-status -n 'inputs | if has(\"status\") then .status==\"UP\" else false end' > /dev/null || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     runs-on: ubuntu-latest
     strategy:
@@ -30,38 +42,8 @@ jobs:
     - name: Lint with flake8
       run: make lint
 
-    - name: Deploy INCEpTION for integration tests
-      run: |
-        docker pull ghcr.io/inception-project/inception:latest
-        docker run --name inception -d \
-          -e JAVA_OPTS='-Dremote-api.enabled=true -Dsecurity.default-admin-username=test-remote -Dsecurity.default-admin-password={bcrypt}\$2a\$12\$fQ.9x17xCGbrGtvw45H20uMqbEjhLIPfoa13bLfM33e./nVuNvCWa -Dsecurity.default-admin-remote-access=true' \
-          -p8080:8080 \
-          ghcr.io/inception-project/inception:latest
-    - name: Wait for INCEpTION to have started
-      timeout-minutes: 5
-      run: |
-        echo "Let's go..."
-        while true; do
-          echo "Contacting service..."
-          response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/actuator/health)
-          echo "Checking if service is available... $response"
-          if [ "$response" -eq 200 ]; then
-            health=$(curl -s http://localhost:8080/actuator/health)
-            echo "Checking if service is healthy... health"
-            if [[ "$health" == *"\"status\":\"UP\""* ]]; then
-              echo "Service is healthy."
-              break
-            fi
-          fi
-          sleep 5
-        done
     - name: Run tests
       run: make coverage
-
-    - name: Shut down INCEpTION
-      timeout-minutes: 5
-      run: |
-        docker docker stop inception
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
