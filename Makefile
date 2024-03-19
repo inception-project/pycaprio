@@ -17,7 +17,7 @@ integ-tests:
 tests: unit-tests integ-tests
 
 coverage:
-	poetry run py.test --cov=pycaprio --cov-branch --cov-fail-under=90 tests/unit_tests
+	poetry run py.test --cov=pycaprio --cov-branch --cov-fail-under=90 --cov-report=xml:coverage.xml tests/unit_tests
 
 # Static analysis/linting
 lint:
