@@ -14,14 +14,15 @@ requests = "*"
 requests-toolbelt = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
-pytest = "*"
+pytest = "^6.2"
 pytest-mock = "*"
 requests-mock = "*"
 flake8 = "*"
 black = { version = "*", allows-prereleases = true }
 coverage = "*"
 mkdocs = "^1.0"
-pytest-cov = "^2.7"
+pytest-cov = "^3.0"
+codecov = "^2.1"
 bump2version = "^0.5.11"
 
 [tool.poetry.group.dev.dependencies]
