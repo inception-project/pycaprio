@@ -5,7 +5,7 @@
 [![Run Tests](https://github.com/inception-project/pycaprio/actions/workflows/run_tests.yml/badge.svg)](https://github.com/inception-project/pycaprio/actions/workflows/run_tests.yml)
 [![codecov](https://codecov.io/gh/inception-project/pycaprio/graph/badge.svg?token=UUE49R7FEK)](https://codecov.io/gh/inception-project/pycaprio)
 
-Python client for the [INCEpTION](https://github.com/inception-project/inception) annotation tool.
+Python client for the [INCEpTION](https://github.com/inception-project/inception) annotation tool remote API.
 
 ## Installation
 At the moment, this fork of `Pycaprio` is only available here, in GitHub (see reasons in "Current state of Pycaprio" below):
@@ -29,4 +29,7 @@ pycaprio_client.api.create_project("Project name", "creator-username")
 Check the [documentation](https://pycaprio.readthedocs.io) if you want to know more.
 
 ## License
-Pycaprio is under the MIT license. Check it out [here](https://opensource.org/licenses/MIT)
+PyCaprio is under the MIT license. Check it out [here](https://opensource.org/licenses/MIT).
+
+PyCaprio was originally developed by [Savanamed](https://github.com/Savanamed/pycaprio) and Javier Luna Molina.
+It is now part of the INCEpTION project.
