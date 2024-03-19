@@ -2,7 +2,7 @@
 name = "pycaprio"
 version = "0.3.0-dev"
 description = "Python client for the INCEpTION annotation tool remote API"
-authors = ["Javier Luna Molina", "Savanamed"]
+authors = ["The INCEpTION Project", "Javier Luna Molina", "Savanamed"]
 license = "MIT"
 packages = [
     { include = "pycaprio" },
@@ -18,7 +18,7 @@ pytest = "^7.2"
 pytest-mock = "*"
 requests-mock = "*"
 flake8 = "*"
-black = { version = "*", allows-prereleases = true }
+black = { version = "*", allow-prereleases = true }
 coverage = "*"
 mkdocs = "^1.0"
 pytest-cov = "^3.0"
@@ -30,7 +30,7 @@ Jinja2 = "^3.1.3"
 
 [tool.black]
 line-length = 120
-target_version = ['py36']
+target_version = ['py38']
 
 [build-system]
 requires = ["poetry_core>=1.0.0"]

@@ -1,8 +1,5 @@
 .PHONY: docs tests
 
-clean:
-	rm -R htmlcov
-
 # Dependencies
 dependencies:
 	poetry install
