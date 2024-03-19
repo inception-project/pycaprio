@@ -16,10 +16,10 @@ jobs:
         ports:
           - 8080:8080
         options: >-
-          --health-cmd "curl -m 5 --silent --fail --request GET http://localhost:8080/actuator/health | jq --exit-status -n 'inputs | if has(\"status\") then .status==\"UP\" else false end' > /dev/null || exit 1"
+          --health-cmd "curl -m 5 --silent --fail --request GET http://localhost:8080/actuator/health | grep -q '.*status.*:.*UP.*' || exit 1"
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 5
+          --health-retries 20
 
     runs-on: ubuntu-latest
     strategy:
