@@ -85,7 +85,7 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
         response = self.client.post(f"/projects/{project_id}/documents", form_data={"name": document_name,
                                                                                     "format": document_format,
                                                                                     "state": document_state},
-                                    files={"content": ('test/path', content)})
+                                    files={"content": ('data', content)})
         document = DocumentSchema().load(response.json()['body'], many=False)
         document.project_id = project_id
         return document
@@ -98,7 +98,7 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
         document_id = self._get_object_id(document)
         response = self.client.post(f"/projects/{project_id}/documents/{document_id}/annotations/{user_name}",
                                     form_data={'format': annotation_format, 'state': annotation_state},
-                                    files={"content": ('test/path', content)})
+                                    files={"content": ('data', content)})
         annotation = AnnotationSchema().load(response.json()['body'], many=False)
         annotation.project_id = project_id
         annotation.document_id = document_id
@@ -137,7 +137,7 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
         return response.content
 
     def import_project(self, zip_stream: IO) -> Project:
-        response = self.client.post("/projects/import", files={"file": ('test/path', zip_stream)})
+        response = self.client.post("/projects/import", files={"file": ('data', zip_stream)})
         return ProjectSchema().load(response.json()['body'], many=False)
 
     def curations(self, project: Union[Project, int], document_state: str = InceptionFormat.DEFAULT) -> List[Document]:
