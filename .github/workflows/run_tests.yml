@@ -27,12 +27,17 @@ jobs:
     - name: Lint with flake8
       run: make lint
     - name: Deploy INCEpTION for integration tests
+      timeout-minutes: 5
       run: |
         docker pull ghcr.io/inception-project/inception:latest
-        docker run \
+        docker run -d \
           -e JAVA_OPTS="-Dsecurity.default-admin-username=test-remote -Dsecurity.default-admin-password='{bcrypt}$2a$12$fQ.9x17xCGbrGtvw45H20uMqbEjhLIPfoa13bLfM33e./nVuNvCWa' -Dsecurity.default-admin-remote-access=true" \
           -p8080:8080 \
           ghcr.io/inception-project/inception:latest
+        while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:8080/actuator/health)" != "200" ]]; do
+          echo "Waiting for service to become healthy..."
+          sleep 5
+        done
     - name: Run tests
       run: make coverage
 
