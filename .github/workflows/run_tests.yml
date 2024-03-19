@@ -14,7 +14,7 @@ jobs:
         env:
           JAVA_OPTS: '-Dremote-api.enabled=true -Dsecurity.default-admin-username=test-remote -Dsecurity.default-admin-password={bcrypt}\$2a\$12\$fQ.9x17xCGbrGtvw45H20uMqbEjhLIPfoa13bLfM33e./nVuNvCWa -Dsecurity.default-admin-remote-access=true'
         ports:
-          8080:8080
+          - 8080:8080
         options: >-
           --health-cmd "curl -m 5 --silent --fail --request GET http://localhost:8080/actuator/health | jq --exit-status -n 'inputs | if has(\"status\") then .status==\"UP\" else false end' > /dev/null || exit 1"
           --health-interval 10s
