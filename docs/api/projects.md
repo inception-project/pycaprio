@@ -4,7 +4,7 @@ Pycaprio uses the `Project` object to model INCEpTION's projects, and has these 
 
 * `project_id`: Id of the project (integer).
 * `project_name`: Project name (string).
-
+* `project_title`: Project title (string).
 
 ### List projects
 Lists all the projects that are in INCEpTION.
