@@ -28,7 +28,7 @@ print(project) # <Project #1: Project name>
 ```
 
 ### Create project
-Creates a project in INCEpTION. It requires the project's name and optionally the creator's username.
+Creates a project in INCEpTION. It requires the project's name and optionally the project's title and the creator's username.
 If no `creator_name` is provided, pycaprio will use the one of the user that is currently logged in to the API.
 
 Example:

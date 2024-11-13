@@ -73,9 +73,10 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
                                    params={'format': annotation_format})
         return response.content
 
-    def create_project(self, project_name: str, creator_name: Optional[str] = None) -> Project:
+    def create_project(self, project_name: str, project_title: Optional[str] = None, creator_name: Optional[str] = None) -> Project:
         creator_name = creator_name or self.default_username
-        response = self.client.post('/projects', data={'creator': creator_name, 'name': project_name})
+        project_title = project_title or project_name
+        response = self.client.post('/projects', data={'creator': creator_name, 'name': project_name, 'title': project_title})
         return ProjectSchema().load(response.json()['body'])
 
     def create_document(self, project: Union[Project, int], document_name: str, content: IO,
