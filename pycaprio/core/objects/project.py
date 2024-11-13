@@ -3,9 +3,10 @@ class Project:
     INCEpTION's Project object
     """
 
-    def __init__(self, project_id: int, project_name: str):
+    def __init__(self, project_id: int, project_name: str, project_title: str):
         self.project_id = project_id
         self.project_name = project_name
+        self.project_title = project_title
 
     def __eq__(self, other):
         return isinstance(other, Project) and \
