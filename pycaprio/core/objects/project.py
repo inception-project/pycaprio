@@ -1,9 +1,11 @@
+from typing import Optional
+
 class Project:
     """
     INCEpTION's Project object
     """
 
-    def __init__(self, project_id: int, project_name: str, project_title: str = None):
+    def __init__(self, project_id: int, project_name: str, project_title: Optional[str] = None):
         self.project_id = project_id
         self.project_name = project_name
         if project_title is None:
