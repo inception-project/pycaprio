@@ -59,3 +59,10 @@ class DocumentState:
     ANNOTATION_COMPLETE = 'ANNOTATION-COMPLETE'
     CURATION_IN_PROGRESS = 'CURATION-IN-PROGRESS'
     CURATION_COMPLETE = 'CURATION-COMPLETE'
+
+
+class RoleType:
+    # https://github.com/inception-project/inception/blob/main/inception/inception-model/src/main/java/de/tudarmstadt/ukp/clarin/webanno/model/PermissionLevel.java
+    ANNOTATOR = "ANNOTATOR"
+    CURATOR = "CURATOR"
+    MANAGER = "MANAGER"

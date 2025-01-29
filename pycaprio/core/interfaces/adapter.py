@@ -7,10 +7,12 @@ from typing import List
 from pycaprio.core.mappings import AnnotationState
 from pycaprio.core.mappings import InceptionFormat
 from pycaprio.core.mappings import DocumentState
+from pycaprio.core.mappings import RoleType
 from pycaprio.core.objects.annotation import Annotation
 from pycaprio.core.objects.document import Document
 from pycaprio.core.objects.project import Project
 from pycaprio.core.objects.curation import Curation
+from pycaprio.core.objects.role import RoleType
 
 
 class BaseInceptionAdapter(metaclass=ABCMeta):
@@ -222,5 +224,37 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
         Deletes curated annotations for a document in a Project
         :param document: Document/Id of the Document in Curation.
         :param project: Project/Project id.
+        """
+        pass  # pragma: no cover
+
+
+    @abstractmethod
+    def list_roles(self, project: Union[Project, int], userId: str) -> List[RoleType]:
+        """
+        List permissions for a user in the given project (non AERO)
+        :param project: Project/Project id.
+        :param userId: Username.
+        """
+        pass  # pragma: no cover
+
+
+    @abstractmethod
+    def assign_roles(self, project: Union[Project, int], userId: str, role:List[RoleType]) -> List[RoleType]:
+        """
+        Assign roles to a user in the given project (non-AERO)
+        :param project: Project/Project id.
+        :param userId: Username.
+        :param role: List of Roles [See PermissionRoles in mappings]
+        """
+        pass  # pragma: no cover
+
+
+    @abstractmethod
+    def delete_roles(self, project: Union[Project, int], userId: str, role:List[RoleType]) -> List[RoleType]:
+        """
+        Delete roles to a user in the given project (non-AERO)
+        :param project: Project/Project id.
+        :param userId: Username.
+        :param role: List of Roles [See PermissionRoles in mappings]
         """
         pass  # pragma: no cover
