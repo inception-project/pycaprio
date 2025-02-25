@@ -3,7 +3,6 @@ from abc import abstractmethod
 
 
 class BaseInceptionSchema(metaclass=ABCMeta):
-
     @abstractmethod
     def load(self, serialized_object_or_list, many: bool = False):
         """

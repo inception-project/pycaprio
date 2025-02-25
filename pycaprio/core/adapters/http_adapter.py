@@ -25,146 +25,191 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
     Documentation is described in the 'BaseInceptionAdapter' class.
     """
 
-    def __init__(self, inception_host: str, authentication: authentication_type,
-                 inception_client: Optional[BaseInceptionClient] = None):
+    def __init__(
+        self,
+        inception_host: str,
+        authentication: authentication_type,
+        inception_client: Optional[BaseInceptionClient] = None,
+    ):
         self.client = inception_client or RetryableInceptionClient(inception_host, authentication)
         self.default_username, _ = authentication
 
     def projects(self) -> List[Project]:
-        response = self.client.get('/projects')
-        return ProjectSchema().load(response.json()['body'], many=True)
+        response = self.client.get("/projects")
+        return ProjectSchema().load(response.json()["body"], many=True)
 
     def project(self, project: Union[Project, int]) -> Project:
         project_id = self._get_object_id(project)
-        response = self.client.get(f'/projects/{project_id}')
-        return ProjectSchema().load(response.json()['body'], many=False)
+        response = self.client.get(f"/projects/{project_id}")
+        return ProjectSchema().load(response.json()["body"], many=False)
 
     def documents(self, project: Union[Project, int]) -> List[Document]:
         project_id = self._get_object_id(project)
-        response = self.client.get(f'/projects/{project_id}/documents')
-        document_list = DocumentSchema().load(response.json()['body'], many=True)
+        response = self.client.get(f"/projects/{project_id}/documents")
+        document_list = DocumentSchema().load(response.json()["body"], many=True)
         for document in document_list:
             document.project_id = project_id
         return document_list
 
-    def document(self, project: Union[Project, int], document: Union[Document, int],
-                 document_format: str = InceptionFormat.DEFAULT) -> bytes:
+    def document(
+        self,
+        project: Union[Project, int],
+        document: Union[Document, int],
+        document_format: str = InceptionFormat.DEFAULT,
+    ) -> bytes:
         project_id = self._get_object_id(project)
         document_id = self._get_object_id(document)
-        response = self.client.get(f'/projects/{project_id}/documents/{document_id}',
-                                   params={'format': document_format})
+        response = self.client.get(
+            f"/projects/{project_id}/documents/{document_id}", params={"format": document_format}
+        )
         return response.content
 
     def annotations(self, project: Union[Project, int], document: Union[Document, int]) -> List[Annotation]:
         project_id = self._get_object_id(project)
         document_id = self._get_object_id(document)
-        response = self.client.get(f'/projects/{project_id}/documents/{document_id}/annotations')
-        annotation_list = AnnotationSchema().load(response.json()['body'], many=True)
+        response = self.client.get(f"/projects/{project_id}/documents/{document_id}/annotations")
+        annotation_list = AnnotationSchema().load(response.json()["body"], many=True)
         for annotation in annotation_list:
             annotation.project_id = project_id
             annotation.document_id = document_id
         return annotation_list
 
-    def annotation(self, project: Union[Project, int], document: Union[Document, int], user_name: str,
-                   annotation_format: str = InceptionFormat.DEFAULT) -> bytes:
+    def annotation(
+        self,
+        project: Union[Project, int],
+        document: Union[Document, int],
+        user_name: str,
+        annotation_format: str = InceptionFormat.DEFAULT,
+    ) -> bytes:
         project_id = self._get_object_id(project)
         document_id = self._get_object_id(document)
-        response = self.client.get(f'/projects/{project_id}/documents/{document_id}/annotations/{user_name}',
-                                   params={'format': annotation_format})
+        response = self.client.get(
+            f"/projects/{project_id}/documents/{document_id}/annotations/{user_name}",
+            params={"format": annotation_format},
+        )
         return response.content
 
-    def create_project(self, project_name: str, project_title: Optional[str] = None, creator_name: Optional[str] = None) -> Project:
+    def create_project(
+        self, project_name: str, project_title: Optional[str] = None, creator_name: Optional[str] = None
+    ) -> Project:
         creator_name = creator_name or self.default_username
         project_title = project_title or project_name
-        response = self.client.post('/projects', data={'creator': creator_name, 'name': project_name, 'title': project_title})
-        return ProjectSchema().load(response.json()['body'])
+        response = self.client.post(
+            "/projects", data={"creator": creator_name, "name": project_name, "title": project_title}
+        )
+        return ProjectSchema().load(response.json()["body"])
 
-    def create_document(self, project: Union[Project, int], document_name: str, content: IO,
-                        document_format: str = InceptionFormat.DEFAULT,
-                        document_state: str = DocumentState.DEFAULT) -> Document:
+    def create_document(
+        self,
+        project: Union[Project, int],
+        document_name: str,
+        content: IO,
+        document_format: str = InceptionFormat.DEFAULT,
+        document_state: str = DocumentState.DEFAULT,
+    ) -> Document:
         project_id = self._get_object_id(project)
-        response = self.client.post(f"/projects/{project_id}/documents", form_data={"name": document_name,
-                                                                                    "format": document_format,
-                                                                                    "state": document_state},
-                                    files={"content": ('data', content)})
-        document = DocumentSchema().load(response.json()['body'], many=False)
+        response = self.client.post(
+            f"/projects/{project_id}/documents",
+            form_data={"name": document_name, "format": document_format, "state": document_state},
+            files={"content": ("data", content)},
+        )
+        document = DocumentSchema().load(response.json()["body"], many=False)
         document.project_id = project_id
         return document
 
-    def create_annotation(self, project: Union[Project, int], document: Union[Document, int], user_name: str,
-                          content: IO,
-                          annotation_format: str = InceptionFormat.DEFAULT,
-                          annotation_state: str = AnnotationState.DEFAULT) -> Annotation:
+    def create_annotation(
+        self,
+        project: Union[Project, int],
+        document: Union[Document, int],
+        user_name: str,
+        content: IO,
+        annotation_format: str = InceptionFormat.DEFAULT,
+        annotation_state: str = AnnotationState.DEFAULT,
+    ) -> Annotation:
         project_id = self._get_object_id(project)
         document_id = self._get_object_id(document)
-        response = self.client.post(f"/projects/{project_id}/documents/{document_id}/annotations/{user_name}",
-                                    form_data={'format': annotation_format, 'state': annotation_state},
-                                    files={"content": ('data', content)})
-        annotation = AnnotationSchema().load(response.json()['body'], many=False)
+        response = self.client.post(
+            f"/projects/{project_id}/documents/{document_id}/annotations/{user_name}",
+            form_data={"format": annotation_format, "state": annotation_state},
+            files={"content": ("data", content)},
+        )
+        annotation = AnnotationSchema().load(response.json()["body"], many=False)
         annotation.project_id = project_id
         annotation.document_id = document_id
         return annotation
 
-    def update_annotation_state(self, project: Union[Project, int], document: Union[Document, int], user_name: str,
-                                annotation_state: str) -> bool:
+    def update_annotation_state(
+        self, project: Union[Project, int], document: Union[Document, int], user_name: str, annotation_state: str
+    ) -> bool:
         project_id = self._get_object_id(project)
         document_id = self._get_object_id(document)
 
-        self.client.post(f"/projects/{project_id}/documents/{document_id}/annotations/{user_name}/state",
-                         form_data={'state': annotation_state})
+        self.client.post(
+            f"/projects/{project_id}/documents/{document_id}/annotations/{user_name}/state",
+            form_data={"state": annotation_state},
+        )
         return True
 
     def delete_project(self, project: Union[Project, int]) -> bool:
         project_id = self._get_object_id(project)
-        self.client.delete(f'/projects/{project_id}')
+        self.client.delete(f"/projects/{project_id}")
         return True
 
     def delete_document(self, project: Union[Project, int], document: Union[Document, int]) -> bool:
         project_id = self._get_object_id(project)
         document_id = self._get_object_id(document)
-        self.client.delete(f'/projects/{project_id}/documents/{document_id}')
+        self.client.delete(f"/projects/{project_id}/documents/{document_id}")
         return True
 
     def delete_annotation(self, project: Union[Project, int], document: Union[Document, int], user_name: str) -> bool:
         project_id = self._get_object_id(project)
         document_id = self._get_object_id(document)
-        self.client.delete(f'/projects/{project_id}/documents/{document_id}/annotations/{user_name}')
+        self.client.delete(f"/projects/{project_id}/documents/{document_id}/annotations/{user_name}")
         return True
 
     def export_project(self, project: Union[Project, int], project_format: str = InceptionFormat.DEFAULT) -> bytes:
         project_id = self._get_object_id(project)
-        response = self.client.get(f"/projects/{project_id}/export.zip",
-                                   params={'format': project_format})
+        response = self.client.get(f"/projects/{project_id}/export.zip", params={"format": project_format})
         return response.content
 
     def import_project(self, zip_stream: IO) -> Project:
-        response = self.client.post("/projects/import", files={"file": ('data', zip_stream)})
-        return ProjectSchema().load(response.json()['body'], many=False)
+        response = self.client.post("/projects/import", files={"file": ("data", zip_stream)})
+        return ProjectSchema().load(response.json()["body"], many=False)
 
     def curations(self, project: Union[Project, int], document_state: str = InceptionFormat.DEFAULT) -> List[Document]:
         curations_list = self.documents(project)
-        curator_list = [document for document in curations_list if
-                        document.document_state == document_state]
+        curator_list = [document for document in curations_list if document.document_state == document_state]
         return curator_list
 
-    def curation(self, project: Union[Project, int], document: Union[Document, int],
-                 curation_format: str = InceptionFormat.DEFAULT) -> bytes:
+    def curation(
+        self,
+        project: Union[Project, int],
+        document: Union[Document, int],
+        curation_format: str = InceptionFormat.DEFAULT,
+    ) -> bytes:
         project_id = self._get_object_id(project)
         document_id = self._get_object_id(document)
-        response = self.client.get(f"/projects/{project_id}/documents/{document_id}/curation",
-                                   params={'format': curation_format})
+        response = self.client.get(
+            f"/projects/{project_id}/documents/{document_id}/curation", params={"format": curation_format}
+        )
         return response.content
 
-    def create_curation(self, project: Union[Project, int], document: Union[Document, int],
-                        content: IO,
-                        document_state: str = DocumentState.DEFAULT,
-                        curation_format: str = InceptionFormat.DEFAULT) -> Curation:
+    def create_curation(
+        self,
+        project: Union[Project, int],
+        document: Union[Document, int],
+        content: IO,
+        document_state: str = DocumentState.DEFAULT,
+        curation_format: str = InceptionFormat.DEFAULT,
+    ) -> Curation:
         project_id = self._get_object_id(project)
         document_id = self._get_object_id(document)
-        response = self.client.post(f"/projects/{project_id}/documents/{document_id}/curation",
-                                    form_data={'format': curation_format, 'state': document_state},
-                                    files={"content": content})
-        curation = CurationSchema().load(response.json()['body'], many=False)
+        response = self.client.post(
+            f"/projects/{project_id}/documents/{document_id}/curation",
+            form_data={"format": curation_format, "state": document_state},
+            files={"content": content},
+        )
+        curation = CurationSchema().load(response.json()["body"], many=False)
         curation.project_id = project_id
         curation.document_id = document_id
         return curation
@@ -172,7 +217,7 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
     def delete_curation(self, project: Union[Project, int], document: Union[Document, int]) -> bool:
         project_id = self._get_object_id(project)
         document_id = self._get_object_id(document)
-        self.client.delete(f'/projects/{project_id}/documents/{document_id}/curation')
+        self.client.delete(f"/projects/{project_id}/documents/{document_id}/curation")
         return True
 
     @staticmethod
@@ -180,7 +225,7 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
         object_id_mappings = {
             Project: lambda p: p.project_id,
             Document: lambda d: d.document_id,
-            Annotation: lambda a: a.user_name
+            Annotation: lambda a: a.user_name,
         }
         for object_class, mapper in object_id_mappings.items():
             if isinstance(o, object_class):

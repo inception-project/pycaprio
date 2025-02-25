@@ -1,5 +1,6 @@
 from typing import Optional
 
+
 class Project:
     """
     INCEpTION's Project object
@@ -13,9 +14,11 @@ class Project:
         self.project_title = project_title
 
     def __eq__(self, other):
-        return isinstance(other, Project) and \
-               other.project_id == self.project_id and \
-               other.project_name == self.project_name
+        return (
+            isinstance(other, Project)
+            and other.project_id == self.project_id
+            and other.project_name == self.project_name
+        )
 
     def __repr__(self):
         return f"<Project #{self.project_id}: {self.project_name}>"

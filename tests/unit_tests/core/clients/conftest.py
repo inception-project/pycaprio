@@ -14,7 +14,7 @@ def mock_host() -> str:
 
 @pytest.fixture
 def mock_authentication() -> authentication_type:
-    return 'test', 'test'
+    return "test", "test"
 
 
 @pytest.fixture
@@ -24,5 +24,5 @@ def client(mock_host: str, mock_authentication: authentication_type) -> Retryabl
 
 @pytest.fixture
 def mock_request_function(mocker: MockFixture) -> Mock:
-    mocked_request = mocker.patch('pycaprio.core.clients.retryable_client.RetryableInceptionClient.request')
+    mocked_request = mocker.patch("pycaprio.core.clients.retryable_client.RetryableInceptionClient.request")
     return mocked_request

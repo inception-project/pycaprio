@@ -5,6 +5,7 @@ class ConfigurationNotProvided(Exception):
     """
     Bad/Missing configuration
     """
+
     pass
 
 

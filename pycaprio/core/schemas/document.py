@@ -19,10 +19,11 @@ class DocumentSchema(BaseInceptionSchema):
     def load(self, serialized_document, many: bool = False):
         if many:
             return [self.load(d) for d in serialized_document]
-        return Document(NO_PROJECT, serialized_document['id'], serialized_document['name'],
-                        serialized_document['state'])
+        return Document(
+            NO_PROJECT, serialized_document["id"], serialized_document["name"], serialized_document["state"]
+        )
 
     def dump(self, document, many: bool = False):
         if many:
             return [self.dump(d) for d in document]
-        return {'id': document.document_id, 'name': document.document_name, 'state': document.document_state}
+        return {"id": document.document_id, "name": document.document_name, "state": document.document_state}

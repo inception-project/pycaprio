@@ -16,7 +16,7 @@ def test_list_documents(pycaprio, test_project, test_name, test_io):
 
 def test_detail_document_gives_content(pycaprio, test_project, test_name, test_io):
     document = pycaprio.api.create_document(test_project, test_name, test_io)
-    assert pycaprio.api.document(test_project, document).decode('utf-8') == TEST_CONTENT
+    assert pycaprio.api.document(test_project, document).decode("utf-8") == TEST_CONTENT
 
 
 def test_delete_document(pycaprio, test_project, test_name, test_io):

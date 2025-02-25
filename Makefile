@@ -16,10 +16,15 @@ tests: unit-tests integ-tests
 coverage:
 	poetry run py.test --cov=pycaprio --cov-branch --cov-fail-under=90 --cov-report=xml:coverage.xml tests
 
+format:
+	poetry run ruff format pycaprio --line-length=120
+	poetry run ruff format tests --line-length=120
+
+
 # Static analysis/linting
 lint:
-	poetry run flake8 pycaprio --max-line-length=120
-	poetry run flake8 tests --max-line-length=120 --ignore=E722
+	poetry run ruff check pycaprio --line-length=120 --fix
+	poetry run ruff check tests --line-length=120 --fix --ignore=E722
 
 # Docs
 docs:

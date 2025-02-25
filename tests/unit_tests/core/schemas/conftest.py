@@ -8,6 +8,7 @@ from pycaprio.core.schemas.curation import CurationSchema
 
 # Fixtures for project
 
+
 @pytest.fixture
 def project_schema():
     return ProjectSchema()

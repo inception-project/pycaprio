@@ -14,7 +14,6 @@ from pycaprio.core.objects.curation import Curation
 
 
 class BaseInceptionAdapter(metaclass=ABCMeta):
-
     @abstractmethod
     def projects(self) -> List[Project]:
         """
@@ -42,8 +41,12 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
         pass  # pragma: no cover
 
     @abstractmethod
-    def document(self, project: Union[Project, int], document: Union[Document, int],
-                 document_format: str = InceptionFormat.DEFAULT) -> bytes:
+    def document(
+        self,
+        project: Union[Project, int],
+        document: Union[Document, int],
+        document_format: str = InceptionFormat.DEFAULT,
+    ) -> bytes:
         """
         Retrieves a Document
         :param project: The project/project id of the Project where the Document is located
@@ -64,9 +67,13 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
         pass  # pragma: no cover
 
     @abstractmethod
-    def annotation(self, project: Union[Project, int], document: Union[Document, int],
-                   annotation: Union[int, Annotation],
-                   annotation_format: str = InceptionFormat.DEFAULT) -> bytes:
+    def annotation(
+        self,
+        project: Union[Project, int],
+        document: Union[Document, int],
+        annotation: Union[int, Annotation],
+        annotation_format: str = InceptionFormat.DEFAULT,
+    ) -> bytes:
         """
         Retrieves a Document
         :param project: The project/project id of the Project where the Annotation is located
@@ -89,9 +96,14 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
         pass  # pragma: no cover
 
     @abstractmethod
-    def create_document(self, project: Union[Project, int], document_name: str, content: IO,
-                        document_format: str = InceptionFormat.DEFAULT,
-                        document_state: str = DocumentState.DEFAULT) -> Document:
+    def create_document(
+        self,
+        project: Union[Project, int],
+        document_name: str,
+        content: IO,
+        document_format: str = InceptionFormat.DEFAULT,
+        document_state: str = DocumentState.DEFAULT,
+    ) -> Document:
         """
         Creates a Document
         :param project: Project/Id of the Project where the new Document will be created
@@ -104,10 +116,15 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
         pass  # pragma: no cover
 
     @abstractmethod
-    def create_annotation(self, project: Union[Project, int], document: Union[Document, int], user_name: str,
-                          content: IO,
-                          annotation_format: str = InceptionFormat.DEFAULT,
-                          annotation_state: str = AnnotationState.DEFAULT):
+    def create_annotation(
+        self,
+        project: Union[Project, int],
+        document: Union[Document, int],
+        user_name: str,
+        content: IO,
+        annotation_format: str = InceptionFormat.DEFAULT,
+        annotation_state: str = AnnotationState.DEFAULT,
+    ):
         """
         Creates a Document
         :param project: Project/Id of the Project where the new Document will be created
@@ -121,8 +138,9 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
         pass  # pragma: no cover
 
     @abstractmethod
-    def update_annotation_state(self, project: Union[Project, int], document: Union[Document, int], user_name: str,
-                                annotation_state: str) -> bool:
+    def update_annotation_state(
+        self, project: Union[Project, int], document: Union[Document, int], user_name: str, annotation_state: str
+    ) -> bool:
         """
         Updates the state of an annotation
         :param project: Project/Id of the Project where the Annotation is
@@ -179,10 +197,14 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
         pass  # pragma: no cover
 
     @abstractmethod
-    def create_curation(self, project: Union[Project, int], document: Union[Document, int],
-                        content: IO,
-                        document_state: str = DocumentState.DEFAULT,
-                        curation_format: str = InceptionFormat.DEFAULT) -> Curation:
+    def create_curation(
+        self,
+        project: Union[Project, int],
+        document: Union[Document, int],
+        content: IO,
+        document_state: str = DocumentState.DEFAULT,
+        curation_format: str = InceptionFormat.DEFAULT,
+    ) -> Curation:
         """
         Creates a curated Document
         :param project: Project/Id of the Project where the new Document will be created
@@ -205,8 +227,12 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
         pass  # pragma: no cover
 
     @abstractmethod
-    def curation(self, project: Union[Project, int], document: Union[Document, int],
-                 curation_format: str = InceptionFormat.DEFAULT) -> bytes:
+    def curation(
+        self,
+        project: Union[Project, int],
+        document: Union[Document, int],
+        curation_format: str = InceptionFormat.DEFAULT,
+    ) -> bytes:
         """
         Exports curated document of a Project as bytes format
         :param document: Document/Id of the Document in Curation.
