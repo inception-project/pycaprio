@@ -54,7 +54,7 @@ class BaseInceptionClient(metaclass=ABCMeta):
         pass  # pragma: no cover
 
     @abstractmethod
-    def delete(self, url: str, json:dict) -> requests.Response:
+    def delete(self, url: str, json: dict) -> requests.Response:
         """
         Issues an authenticated DELETE request to Inception
         :param url: relative url to make request

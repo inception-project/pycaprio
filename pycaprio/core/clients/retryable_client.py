@@ -33,8 +33,8 @@ class RetryableInceptionClient(BaseInceptionClient):
     ) -> requests.Response:
         return self.request("post", url, data=data, form_data=form_data, files=files)
 
-    def delete(self, url: str,  data: Optional[dict] = None) -> requests.Response:
-        return self.request('delete', url, data=data)
+    def delete(self, url: str, data: Optional[dict] = None) -> requests.Response:
+        return self.request("delete", url, data=data)
 
     def request(self, method: str, url: str, **kwargs) -> requests.Response:
         retries = 0

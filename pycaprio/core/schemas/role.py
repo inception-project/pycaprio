@@ -16,9 +16,9 @@ class RoleSchema(BaseInceptionSchema):
     def load(self, roles_dict: serialized_type, many: bool = False) -> deserialized_type:
         if many:
             return [self.load(project, many=False) for project in roles_dict]
-        return Role(project_id=roles_dict['project'], userId=roles_dict['user'], roles=roles_dict['role'])
+        return Role(project_id=roles_dict["project"], userId=roles_dict["user"], roles=roles_dict["role"])
 
     def dump(self, roles: deserialized_type, many: bool = False) -> serialized_type:
         if many:
             return [self.dump(p, many=False) for p in roles]
-        return {'projectId': roles.project_id, 'user': roles.userId, 'role':roles.roles}
+        return {"projectId": roles.project_id, "user": roles.userId, "role": roles.roles}

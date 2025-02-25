@@ -216,20 +216,20 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
         self.client.delete(f"/projects/{project_id}/documents/{document_id}/curation")
         return True
 
-    def list_roles(self, project: Union[Project, int], userId:str) -> list[Role] | Role:
+    def list_roles(self, project: Union[Project, int], userId: str) -> list[Role] | Role:
         project_id = self._get_object_id(project)
-        response = self.client.get(f'/projects/{project_id}/permissions/{userId}')
-        return RoleSchema().load(response.json()['body'], many=True)
+        response = self.client.get(f"/projects/{project_id}/permissions/{userId}")
+        return RoleSchema().load(response.json()["body"], many=True)
 
-    def assign_roles(self, project: Union[Project, int], userId:str, roles:List[str]) -> list[Role] | Role:
+    def assign_roles(self, project: Union[Project, int], userId: str, roles: List[str]) -> list[Role] | Role:
         project_id = self._get_object_id(project)
-        response = self.client.post(f'/projects/{project_id}/permissions/{userId}', data={'roles': roles})
-        return RoleSchema().load(response.json()['body'], many=True)
+        response = self.client.post(f"/projects/{project_id}/permissions/{userId}", data={"roles": roles})
+        return RoleSchema().load(response.json()["body"], many=True)
 
-    def delete_roles(self, project: Union[Project, int], userId:str, roles:List[str]) -> list[Role] | Role:
+    def delete_roles(self, project: Union[Project, int], userId: str, roles: List[str]) -> list[Role] | Role:
         project_id = self._get_object_id(project)
-        response = self.client.delete(f'/projects/{project_id}/permissions/{userId}', data={'roles': roles})
-        return RoleSchema().load(response.json()['body'], many=True)
+        response = self.client.delete(f"/projects/{project_id}/permissions/{userId}", data={"roles": roles})
+        return RoleSchema().load(response.json()["body"], many=True)
 
     @staticmethod
     def _get_object_id(o: Union[int, Project, Document, Annotation]) -> int:

@@ -1,14 +1,15 @@
-__any__ = ['Role']
+__any__ = ["Role"]
 
 import typing
 from pycaprio.core.mappings import RoleType
+
 
 class Role:
     """
     INCEpTION's Permissions object
     """
 
-    def __init__(self, project_id: int, userId:str, roles:typing.List[RoleType]):
+    def __init__(self, project_id: int, userId: str, roles: typing.List[RoleType]):
         self.project_id = project_id
         self.userId = userId
         self.roles = roles

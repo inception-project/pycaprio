@@ -7,7 +7,6 @@ from typing import List
 from pycaprio.core.mappings import AnnotationState
 from pycaprio.core.mappings import InceptionFormat
 from pycaprio.core.mappings import DocumentState
-from pycaprio.core.mappings import RoleType
 from pycaprio.core.objects.annotation import Annotation
 from pycaprio.core.objects.document import Document
 from pycaprio.core.objects.project import Project
@@ -253,7 +252,6 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
         """
         pass  # pragma: no cover
 
-
     @abstractmethod
     def list_roles(self, project: Union[Project, int], userId: str) -> List[RoleType]:
         """
@@ -263,9 +261,8 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
         """
         pass  # pragma: no cover
 
-
     @abstractmethod
-    def assign_roles(self, project: Union[Project, int], userId: str, role:List[RoleType]) -> List[RoleType]:
+    def assign_roles(self, project: Union[Project, int], userId: str, role: List[RoleType]) -> List[RoleType]:
         """
         Assign roles to a user in the given project (non-AERO)
         :param project: Project/Project id.
@@ -274,9 +271,8 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
         """
         pass  # pragma: no cover
 
-
     @abstractmethod
-    def delete_roles(self, project: Union[Project, int], userId: str, role:List[RoleType]) -> List[RoleType]:
+    def delete_roles(self, project: Union[Project, int], userId: str, role: List[RoleType]) -> List[RoleType]:
         """
         Delete roles to a user in the given project (non-AERO)
         :param project: Project/Project id.
