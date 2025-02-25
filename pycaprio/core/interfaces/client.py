@@ -17,7 +17,7 @@ class BaseInceptionClient(metaclass=ABCMeta):
         :param inception_host: Inception host. This would be an url pointing to your inception machine.
         :param authentication: username, password tuple. User must have a remote role.
         """
-        self.inception_host = inception_host[:-1] if inception_host[-1] == '/' else inception_host
+        self.inception_host = inception_host[:-1] if inception_host[-1] == "/" else inception_host
         self.authentication = authentication
 
     def build_url(self, relative_url: str) -> str:
@@ -29,7 +29,7 @@ class BaseInceptionClient(metaclass=ABCMeta):
         url_is_absolute = bool(urlparse(relative_url).netloc)
         if url_is_absolute:
             return relative_url
-        relative_url = "/" + relative_url if relative_url[0] != '/' else relative_url
+        relative_url = "/" + relative_url if relative_url[0] != "/" else relative_url
         return f"{self.inception_host}{self.INCEPTION_API_PATH}{relative_url}"
 
     @abstractmethod
@@ -63,8 +63,7 @@ class BaseInceptionClient(metaclass=ABCMeta):
         pass  # pragma: no cover
 
     @abstractmethod
-    def request(self, method: str, url: str,
-                **kwargs) -> requests.Response:
+    def request(self, method: str, url: str, **kwargs) -> requests.Response:
         """
         Issues an authenticated request to Inception
         :param url: relative url to make request

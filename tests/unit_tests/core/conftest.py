@@ -20,6 +20,7 @@ from pycaprio.core.schemas.curation import CurationSchema
 
 # Fixtures for project
 
+
 @pytest.fixture
 def project_schema():
     return ProjectSchema()
@@ -42,10 +43,11 @@ def deserialized_project(mock_project_name: str, mock_project_id: int):
 
 @pytest.fixture
 def serialized_project(mock_project_name: str, mock_project_id: int):
-    return {'id': mock_project_id, 'name': mock_project_name}
+    return {"id": mock_project_id, "name": mock_project_name}
 
 
 # Fixtures for document
+
 
 @pytest.fixture
 def document_schema():
@@ -74,10 +76,11 @@ def deserialized_document(mock_document_id: int, mock_document_name: str, mock_d
 
 @pytest.fixture
 def serialized_document(mock_document_id: int, mock_document_name: str, mock_document_state: str):
-    return {'id': mock_document_id, 'name': mock_document_name, 'state': mock_document_state}
+    return {"id": mock_document_id, "name": mock_document_name, "state": mock_document_state}
 
 
 # Fixtures for annotation
+
 
 @pytest.fixture
 def annotation_schema():
@@ -105,14 +108,15 @@ def mock_datetime_date(mock_str_date: str):
 
 
 @pytest.fixture
-def deserialized_annotation(mock_annotation_user: str, mock_annotation_state: str,
-                            mock_datetime_date: datetime.datetime):
+def deserialized_annotation(
+    mock_annotation_user: str, mock_annotation_state: str, mock_datetime_date: datetime.datetime
+):
     return Annotation(NO_PROJECT, NO_DOCUMENT, mock_annotation_user, mock_annotation_state, mock_datetime_date)
 
 
 @pytest.fixture
 def serialized_annotation(mock_annotation_user: str, mock_annotation_state: str, mock_str_date: str):
-    return {'user': mock_annotation_user, 'state': mock_annotation_state, 'timestamp': mock_str_date}
+    return {"user": mock_annotation_user, "state": mock_annotation_state, "timestamp": mock_str_date}
 
 
 @pytest.fixture
@@ -122,14 +126,22 @@ def mock_io():
 
 @pytest.fixture
 def serializations(serialized_project, serialized_annotation, serialized_document, serialized_curation):
-    return {'project': serialized_project, 'annotation': serialized_annotation, 'document': serialized_document,
-            'curation': serialized_curation}
+    return {
+        "project": serialized_project,
+        "annotation": serialized_annotation,
+        "document": serialized_document,
+        "curation": serialized_curation,
+    }
 
 
 @pytest.fixture
 def deserializations(deserialized_project, deserialized_annotation, deserialized_document, deserialized_curation):
-    return {'project': deserialized_project, 'annotation': deserialized_annotation, 'document': deserialized_document,
-            'curation': deserialized_curation}
+    return {
+        "project": deserialized_project,
+        "annotation": deserialized_annotation,
+        "document": deserialized_document,
+        "curation": deserialized_curation,
+    }
 
 
 @pytest.fixture
@@ -143,13 +155,18 @@ def mock_curation_user():
 
 
 @pytest.fixture
-def deserialized_curation(mock_project_id: int, mock_document_id: int, mock_curation_user: str,
-                          mock_document_state: str, mock_datetime_date: datetime.datetime):
-    return Curation(NO_PROJECT, NO_DOCUMENT, mock_curation_user, mock_document_state,
-                    mock_datetime_date)
+def deserialized_curation(
+    mock_project_id: int,
+    mock_document_id: int,
+    mock_curation_user: str,
+    mock_document_state: str,
+    mock_datetime_date: datetime.datetime,
+):
+    return Curation(NO_PROJECT, NO_DOCUMENT, mock_curation_user, mock_document_state, mock_datetime_date)
 
 
 @pytest.fixture
-def serialized_curation(mock_project_id: int, mock_document_id: int, mock_curation_user: str,
-                        mock_document_state: str, mock_str_date: str):
-    return {'user': mock_curation_user, 'state': mock_document_state, 'timestamp': mock_str_date}
+def serialized_curation(
+    mock_project_id: int, mock_document_id: int, mock_curation_user: str, mock_document_state: str, mock_str_date: str
+):
+    return {"user": mock_curation_user, "state": mock_document_state, "timestamp": mock_str_date}

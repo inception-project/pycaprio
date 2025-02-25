@@ -8,9 +8,11 @@ class Project:
         self.project_name = project_name
 
     def __eq__(self, other):
-        return isinstance(other, Project) and \
-               other.project_id == self.project_id and \
-               other.project_name == self.project_name
+        return (
+            isinstance(other, Project)
+            and other.project_id == self.project_id
+            and other.project_name == self.project_name
+        )
 
     def __repr__(self):
         return f"<Project #{self.project_id}: {self.project_name}>"
