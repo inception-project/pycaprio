@@ -10,11 +10,13 @@ class Document:
         self.document_state = document_state
 
     def __eq__(self, other):
-        return isinstance(other, Document) and \
-               other.project_id == self.project_id and \
-               other.document_id == self.document_id and \
-               other.document_name == self.document_name and \
-               other.document_state == self.document_state
+        return (
+            isinstance(other, Document)
+            and other.project_id == self.project_id
+            and other.document_id == self.document_id
+            and other.document_name == self.document_name
+            and other.document_state == self.document_state
+        )
 
     def __repr__(self):
         return f"<Document #{self.document_id}: {self.document_name} (Project: {self.project_id})>"
