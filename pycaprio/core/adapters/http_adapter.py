@@ -216,19 +216,19 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
         self.client.delete(f"/projects/{project_id}/documents/{document_id}/curation")
         return True
 
-    def list_roles(self, project: Union[Project, int], userId: str) -> list[Role] | Role:
+    def list_roles(self, project: Union[Project, int], user_id: str) -> List[Role]:
         project_id = self._get_object_id(project)
-        response = self.client.get(f"/projects/{project_id}/permissions/{userId}")
+        response = self.client.get(f"/projects/{project_id}/permissions/{user_id}")
         return RoleSchema().load(response.json()["body"], many=True)
 
-    def assign_roles(self, project: Union[Project, int], userId: str, roles: List[str]) -> list[Role] | Role:
+    def assign_roles(self, project: Union[Project, int], user_id: str, roles: List[str]) -> List[Role]:
         project_id = self._get_object_id(project)
-        response = self.client.post(f"/projects/{project_id}/permissions/{userId}", data={"roles": roles})
+        response = self.client.post(f"/projects/{project_id}/permissions/{user_id}", data={"roles": roles})
         return RoleSchema().load(response.json()["body"], many=True)
 
-    def delete_roles(self, project: Union[Project, int], userId: str, roles: List[str]) -> list[Role] | Role:
+    def delete_roles(self, project: Union[Project, int], user_id: str, roles: List[str]) -> List[Role]:
         project_id = self._get_object_id(project)
-        response = self.client.delete(f"/projects/{project_id}/permissions/{userId}", data={"roles": roles})
+        response = self.client.delete(f"/projects/{project_id}/permissions/{user_id}", data={"roles": roles})
         return RoleSchema().load(response.json()["body"], many=True)
 
     @staticmethod
