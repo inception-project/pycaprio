@@ -4,7 +4,7 @@ Pycaprio uses the `Project` object to model INCEpTION's projects, and has these 
 
 * `project_id`: Id of the project (integer).
 * `project_name`: Project name (string).
-
+* `project_title`: Project title (string).
 
 ### List projects
 Lists all the projects that are in INCEpTION.
@@ -28,7 +28,7 @@ print(project) # <Project #1: Project name>
 ```
 
 ### Create project
-Creates a project in INCEpTION. It requires the project's name and optionally the creator's username.
+Creates a project in INCEpTION. It requires the project's name and optionally the project's title and the creator's username.
 If no `creator_name` is provided, pycaprio will use the one of the user that is currently logged in to the API.
 
 Example:

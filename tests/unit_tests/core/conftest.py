@@ -43,7 +43,7 @@ def deserialized_project(mock_project_name: str, mock_project_id: int):
 
 @pytest.fixture
 def serialized_project(mock_project_name: str, mock_project_id: int):
-    return {"id": mock_project_id, "name": mock_project_name}
+    return {"id": mock_project_id, "name": mock_project_name, "title": mock_project_name}
 
 
 # Fixtures for document
