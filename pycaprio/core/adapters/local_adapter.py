@@ -1,3 +1,4 @@
+import datetime
 import os
 import json
 import zipfile
@@ -7,6 +8,7 @@ from pycaprio.core.interfaces.adapter import BaseInceptionAdapter
 from pycaprio.core.mappings import AnnotationState, DocumentState, InceptionFormat
 from pycaprio.core.objects.project import Project
 from pycaprio.core.objects.document import Document
+from pycaprio.core.objects.annotation import Annotation
 
 
 class LocalInceptionAdapter(BaseInceptionAdapter):
@@ -110,11 +112,52 @@ class LocalInceptionAdapter(BaseInceptionAdapter):
             with zip_ref.open(f"source/{document_id}") as document_file:
                 return document_file.read()
 
-    def annotations(self, project, document):
-        raise NotImplementedError
+    def annotations(self, project: Union[Project, str], document: Union[Document, str]) -> List[str]:
+        """
+        Returns a list of all annotations for a document.
 
-    def annotation(self, project, document, annotation, annotation_format=InceptionFormat.DEFAULT):
-        raise NotImplementedError
+        :param project: Project object or project ID. (Project ID is the filename of the exported project ZIP file.)
+        :param document: Document object or document ID. (Document ID is the filename of the document in the ZIP file.)
+        """
+        project_id = project if isinstance(project, str) else project.project_id
+        document_id = document if isinstance(document, str) else document.document_id
+        zip_path = self._get_project_zip_path(project_id)
+        annotation_list = []
+        with zipfile.ZipFile(zip_path, "r") as zip_ref:
+            with zip_ref.open("exportedproject.json") as json_file:
+                project_data = json.load(json_file)
+                for d in project_data["annotation_documents"]:
+                    if d["name"] == document_id:
+                        annotation_list.append(
+                            Annotation(
+                                project_id=project_id,
+                                document_id=document_id,
+                                user_name=d["user"],
+                                annotation_state=d["state"],
+                                timestamp=datetime.datetime.fromtimestamp(
+                                    d["timestamp"] // 1000, tz=datetime.timezone(datetime.timedelta(hours=2))
+                                ),
+                            )
+                        )
+
+        return annotation_list
+
+    def annotation(self, project: Union[Project, str], document: Union[Document, str], user_name: str) -> bytes:
+        """
+        Returns the content of an annotation.
+        NOTE: Returns the annotation in JSON CAS format only.
+
+        :param project: Project object or project ID. (Project ID is the filename of the exported project ZIP file.)
+        :param document: Document object or document ID. (Document ID is the filename of the document in the ZIP file.)
+        :param user_name: User name of the annotator.
+        """
+
+        project_id = project if isinstance(project, str) else project.project_id
+        document_id = document if isinstance(document, str) else document.document_id
+        zip_path = self._get_project_zip_path(project_id)
+        with zipfile.ZipFile(zip_path, "r") as zip_ref:
+            with zip_ref.open(f"annotation/{document_id}/{user_name}.json") as document_file:
+                return document_file.read()
 
     def create_project(self, project_name, creator_name):
         raise NotImplementedError
