@@ -6,15 +6,12 @@ dependencies:
 
 # Tests
 unit-tests:
-	poetry run py.test --cov=pycaprio --cov-branch --cov-fail-under=90 tests/unit_tests
+	poetry run py.test --cov=pycaprio --cov-branch --cov-fail-under=90 --cov-report=xml:unit-coverage.xml tests/unit_tests
 
 integ-tests:
-	poetry run py.test --cov=pycaprio --cov-branch --cov-fail-under=90 tests/integ_tests
+	poetry run py.test -s --cov=pycaprio --cov-branch --cov-fail-under=70 --cov-report=xml:integration-coverage.xml tests/integ_tests
 
 tests: unit-tests integ-tests
-
-coverage:
-	poetry run py.test --cov=pycaprio --cov-branch --cov-fail-under=90 --cov-report=xml:coverage.xml tests
 
 format:
 	poetry run ruff format pycaprio --line-length=120

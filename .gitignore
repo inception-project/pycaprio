@@ -32,7 +32,8 @@ htmlcov/
 .coverage.*
 .cache
 nosetests.xml
-coverage.xml
+unit-coverage.xml
+integration-coverage.xml
 .pytest_cache/
 *.cover
 .hypothesis/
