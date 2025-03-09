@@ -32,10 +32,6 @@ At this point, you should have everything ready to start developing, but what is
 This project has both unit tests and integration tests. Unit tests are fine to run in isolation by
 just `make unit-tests`.
 
-For the integration tests, you will need a reachable INCEpTION instance that has the remote API enabled. Needlessly to
-say, **DO NOT USE A PROD INSTANCE FOR THIS, USE A DISPOSABLE ONE**. By default, the integs will
-target `http://localhost:8080`, although you can override that value via `TEST_INCEPTION_ENDPOINT` env variable.
-
 You will need to then create an user there and enable `REMOTE_API` permissions.
 
 The username and password should be `test-remote`, although you can override those values by using the
