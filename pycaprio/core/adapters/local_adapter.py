@@ -6,6 +6,7 @@ from typing import List, Union
 from pycaprio.core.interfaces.adapter import BaseInceptionAdapter
 from pycaprio.core.mappings import AnnotationState, DocumentState, InceptionFormat
 from pycaprio.core.objects.project import Project
+from pycaprio.core.objects.document import Document
 
 
 class LocalInceptionAdapter(BaseInceptionAdapter):
@@ -32,25 +33,26 @@ class LocalInceptionAdapter(BaseInceptionAdapter):
             return zip_path
         raise FileNotFoundError(f"No ZIP file found for project: {project_id}")
 
-
     def projects(self) -> List[Project]:
         """
         Returns a list of all available projects (metadata) in the local directory.
         """
         projects = []
-        zip_files = [f for f in os.listdir(self.local_projects_dir) if f.endswith('.zip')]
+        zip_files = [f for f in os.listdir(self.local_projects_dir) if f.endswith(".zip")]
         for zip_file in zip_files:
             zip_path = os.path.join(self.local_projects_dir, zip_file)
-            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                if 'exportedproject.json' in zip_ref.namelist():
-                    with zip_ref.open('exportedproject.json') as json_file:
+            with zipfile.ZipFile(zip_path, "r") as zip_ref:
+                if "exportedproject.json" in zip_ref.namelist():
+                    with zip_ref.open("exportedproject.json") as json_file:
                         project_data = json.load(json_file)
-                        projects.append(Project(
-                            project_id=zip_file.removesuffix('.zip'),
-                            # If you're wondering why slug is name and name is title, it's because the INCEpTION API does it that way, so we're following that convention ¯\_(ツ)_/¯
-                            project_name=project_data["slug"],
-                            project_title=project_data["name"]
-                        ))
+                        projects.append(
+                            Project(
+                                project_id=zip_file.removesuffix(".zip"),
+                                # If you're wondering why slug is name and name is title, it's because the INCEpTION API does it that way, so we're following that convention ¯\_(ツ)_/¯
+                                project_name=project_data["slug"],
+                                project_title=project_data["name"],
+                            )
+                        )
 
         return projects
 
@@ -62,34 +64,80 @@ class LocalInceptionAdapter(BaseInceptionAdapter):
         """
         project_id = project if isinstance(project, str) else project.project_id
         zip_path = self._get_project_zip_path(project_id)
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            with zip_ref.open('exportedproject.json') as json_file:
+        with zipfile.ZipFile(zip_path, "r") as zip_ref:
+            with zip_ref.open("exportedproject.json") as json_file:
                 project_data = json.load(json_file)
                 return Project(
-                    project_id=project_id,
-                    project_name=project_data["slug"],
-                    project_title=project_data["name"]
+                    project_id=project_id, project_name=project_data["slug"], project_title=project_data["name"]
                 )
 
-    def documents(self, project):
-        raise NotImplementedError
+    def documents(self, project: Union[Project, str]) -> List[str]:
+        """
+        Returns a list of all available documents in the project.
 
-    def document(self, project, document, document_format = InceptionFormat.DEFAULT):
-        raise NotImplementedError
+        :param project: Project object or project ID. (Project ID is the filename of the exported project ZIP file.)
+        """
+        project_id = project if isinstance(project, str) else project.project_id
+        zip_path = self._get_project_zip_path(project_id)
+        document_list = []
+        with zipfile.ZipFile(zip_path, "r") as zip_ref:
+            with zip_ref.open("exportedproject.json") as json_file:
+                project_data = json.load(json_file)
+                for document in project_data["source_documents"]:
+                    document_list.append(
+                        Document(
+                            project_id=project_id,
+                            document_id=document["name"],
+                            document_name=document["name"],
+                            document_state=document["state"],
+                        )
+                    )
+
+        return document_list
+
+    def document(self, project: Union[Project, str], document: Union[Document, str]) -> bytes:
+        """
+        Returns the content of a document.
+
+        :param project: Project object or project ID. (Project ID is the filename of the exported project ZIP file.)
+        :param document: Document object or document ID. (Document ID is the filename of the document in the ZIP file.)
+        """
+
+        project_id = project if isinstance(project, str) else project.project_id
+        document_id = document if isinstance(document, str) else document.document_id
+        zip_path = self._get_project_zip_path(project_id)
+        with zipfile.ZipFile(zip_path, "r") as zip_ref:
+            with zip_ref.open(f"source/{document_id}") as document_file:
+                return document_file.read()
 
     def annotations(self, project, document):
         raise NotImplementedError
 
-    def annotation(self, project, document, annotation, annotation_format = InceptionFormat.DEFAULT):
+    def annotation(self, project, document, annotation, annotation_format=InceptionFormat.DEFAULT):
         raise NotImplementedError
 
     def create_project(self, project_name, creator_name):
         raise NotImplementedError
 
-    def create_document(self, project, document_name, content, document_format = InceptionFormat.DEFAULT, document_state = DocumentState.DEFAULT):
+    def create_document(
+        self,
+        project,
+        document_name,
+        content,
+        document_format=InceptionFormat.DEFAULT,
+        document_state=DocumentState.DEFAULT,
+    ):
         raise NotImplementedError
 
-    def create_annotation(self, project, document, user_name, content, annotation_format = InceptionFormat.DEFAULT, annotation_state = AnnotationState.DEFAULT):
+    def create_annotation(
+        self,
+        project,
+        document,
+        user_name,
+        content,
+        annotation_format=InceptionFormat.DEFAULT,
+        annotation_state=AnnotationState.DEFAULT,
+    ):
         raise NotImplementedError
 
     def update_annotation_state(self, project, document, user_name, annotation_state):
@@ -104,19 +152,21 @@ class LocalInceptionAdapter(BaseInceptionAdapter):
     def delete_annotation(self, project, document, user_name):
         raise NotImplementedError
 
-    def export_project(self, project, project_format = InceptionFormat.DEFAULT):
+    def export_project(self, project, project_format=InceptionFormat.DEFAULT):
         raise NotImplementedError
 
     def import_project(self, zip_file):
         raise NotImplementedError
 
-    def create_curation(self, project, document, content, document_state = DocumentState.DEFAULT, curation_format = InceptionFormat.DEFAULT):
+    def create_curation(
+        self, project, document, content, document_state=DocumentState.DEFAULT, curation_format=InceptionFormat.DEFAULT
+    ):
         raise NotImplementedError
 
-    def curations(self, project, document_state = InceptionFormat.DEFAULT):
+    def curations(self, project, document_state=InceptionFormat.DEFAULT):
         raise NotImplementedError
 
-    def curation(self, project, document, curation_format = InceptionFormat.DEFAULT):
+    def curation(self, project, document, curation_format=InceptionFormat.DEFAULT):
         raise NotImplementedError
 
     def delete_curation(self, project, document):
