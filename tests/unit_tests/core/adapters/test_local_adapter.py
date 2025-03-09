@@ -3,6 +3,7 @@ import pytest
 from unittest.mock import patch
 from pycaprio.core.adapters.local_adapter import LocalInceptionAdapter
 from pycaprio.core.objects.project import Project
+from pycaprio.core.objects.document import Document
 
 
 @pytest.fixture
@@ -12,11 +13,14 @@ def local_adapter():
 
 @pytest.fixture
 def mock_project_data():
-    return {"slug": "test-project", "name": "Test Project", "source_documents": [
-        {"name": "doc1.txt", "state": "NEW"},
-        {"name": "doc2.txt", "state": "ANNOTATION_IN_PROGRESS"},
-    ]}
-
+    return {
+        "slug": "test-project",
+        "name": "Test Project",
+        "source_documents": [
+            {"name": "doc1.txt", "state": "NEW"},
+            {"name": "doc2.txt", "state": "ANNOTATION_IN_PROGRESS"},
+        ],
+    }
 
 
 def test_get_project_zip_path_exists(local_adapter: LocalInceptionAdapter):
@@ -115,3 +119,33 @@ def test_documents_with_project_object(local_adapter: LocalInceptionAdapter, moc
 
         assert len(documents) == 2
         assert all(doc.project_id == "test-project" for doc in documents)
+
+
+def test_document(local_adapter: LocalInceptionAdapter):
+    with patch("os.path.exists") as mock_exists, patch("zipfile.ZipFile") as mock_zipfile:
+        mock_exists.return_value = True
+        mock_zipfile.return_value.__enter__.return_value.open.return_value.__enter__.return_value.read.return_value = (
+            b"test content"
+        )
+
+        content = local_adapter.document("test-project", "doc1.txt")
+
+        assert content == b"test content"
+        mock_zipfile.return_value.__enter__.return_value.open.assert_called_with("source/doc1.txt")
+
+
+def test_document_with_objects(local_adapter: LocalInceptionAdapter):
+    test_project = Project("test-project", "test-project", "Test Project")
+    test_document = Document("test-project", "doc1.txt", "doc1.txt", "NEW")
+
+    with patch("os.path.exists") as mock_exists, patch("zipfile.ZipFile") as mock_zipfile:
+        mock_exists.return_value = True
+        mock_zipfile.return_value.__enter__.return_value.open.return_value.__enter__.return_value.read.return_value = (
+            b"test content"
+        )
+
+        content = local_adapter.document(test_project, test_document)
+
+        assert content == b"test content"
+        mock_zipfile.return_value.__enter__.return_value.open.assert_called_with("source/doc1.txt")
+
