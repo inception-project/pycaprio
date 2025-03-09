@@ -20,6 +20,10 @@ def mock_project_data():
             {"name": "doc1.txt", "state": "NEW"},
             {"name": "doc2.txt", "state": "ANNOTATION_IN_PROGRESS"},
         ],
+        "annotation_documents": [
+            {"name": "doc1.txt", "user": "admin", "state": "IN_PROGRESS", "timestamp": 1609459200000},
+            {"name": "doc1.txt", "user": "annotator", "state": "COMPLETE", "timestamp": 1609459200000},
+        ],
     }
 
 
@@ -149,3 +153,68 @@ def test_document_with_objects(local_adapter: LocalInceptionAdapter):
         assert content == b"test content"
         mock_zipfile.return_value.__enter__.return_value.open.assert_called_with("source/doc1.txt")
 
+
+def test_annotations(local_adapter: LocalInceptionAdapter, mock_project_data: dict):
+
+    with patch("os.path.exists") as mock_exists, patch("zipfile.ZipFile") as mock_zipfile:
+        mock_exists.return_value = True
+        mock_zipfile.return_value.__enter__.return_value.open.return_value.__enter__.return_value.read.return_value = (
+            json.dumps(mock_project_data)
+        )
+
+        annotations = local_adapter.annotations("test-project", "doc1.txt")
+
+        assert len(annotations) == 2
+        assert annotations[0].project_id == "test-project"
+        assert annotations[0].document_id == "doc1.txt"
+        assert annotations[0].user_name == "admin"
+        assert annotations[0].annotation_state == "IN_PROGRESS"
+        assert annotations[1].project_id == "test-project"
+        assert annotations[1].document_id == "doc1.txt"
+        assert annotations[1].user_name == "annotator"
+        assert annotations[1].annotation_state == "COMPLETE"
+
+
+def test_annotations_with_objects(local_adapter: LocalInceptionAdapter, mock_project_data: dict):
+    test_project = Project("test-project", "test-project", "Test Project")
+    test_document = Document("test-project", "doc1.txt", "doc1.txt", "NEW")
+
+    with patch("os.path.exists") as mock_exists, patch("zipfile.ZipFile") as mock_zipfile:
+        mock_exists.return_value = True
+        mock_zipfile.return_value.__enter__.return_value.open.return_value.__enter__.return_value.read.return_value = (
+            json.dumps(mock_project_data)
+        )
+
+        annotations = local_adapter.annotations(test_project, test_document)
+
+        assert len(annotations) == 2
+        assert annotations[0].project_id == "test-project"
+        assert annotations[0].document_id == "doc1.txt"
+
+def test_annotation(local_adapter: LocalInceptionAdapter):
+    with patch("os.path.exists") as mock_exists, patch("zipfile.ZipFile") as mock_zipfile:
+        mock_exists.return_value = True
+        mock_zipfile.return_value.__enter__.return_value.open.return_value.__enter__.return_value.read.return_value = (
+            b'{"annotation": "test content"}'
+        )
+
+        content = local_adapter.annotation("test-project", "doc1.txt", "admin")
+
+        assert content == b'{"annotation": "test content"}'
+        mock_zipfile.return_value.__enter__.return_value.open.assert_called_with("annotation/doc1.txt/admin.json")
+
+
+def test_annotation_with_objects(local_adapter: LocalInceptionAdapter):
+    test_project = Project("test-project", "test-project", "Test Project")
+    test_document = Document("test-project", "doc1.txt", "doc1.txt", "NEW")
+
+    with patch("os.path.exists") as mock_exists, patch("zipfile.ZipFile") as mock_zipfile:
+        mock_exists.return_value = True
+        mock_zipfile.return_value.__enter__.return_value.open.return_value.__enter__.return_value.read.return_value = (
+            b'{"annotation": "test content"}'
+        )
+
+        content = local_adapter.annotation(test_project, test_document, "admin")
+
+        assert content == b'{"annotation": "test content"}'
+        mock_zipfile.return_value.__enter__.return_value.open.assert_called_with("annotation/doc1.txt/admin.json")
