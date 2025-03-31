@@ -112,7 +112,7 @@ class LocalInceptionAdapter(BaseInceptionAdapter):
             with zip_ref.open(f"source/{document_id}") as document_file:
                 return document_file.read()
 
-    def annotations(self, project: Union[Project, str], document: Union[Document, str]) -> List[str]:
+    def annotations(self, project: Union[Project, str], document: Union[Document, str]) -> List[Annotation]:
         """
         Returns a list of all annotations for a document.
 
