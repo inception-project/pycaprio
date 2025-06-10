@@ -28,6 +28,15 @@ pycaprio_client.api.create_project("Project name", "creator-username")
 
 Check the [documentation](https://pycaprio.readthedocs.io) if you want to know more.
 
+## Release
+
+* Set the release version in `pyproject.toml` (e.g. `version = "0.3.1"`)
+* Create a tag for the version e.g. `v0.3.1`
+* Push the tag - this will trigger a GitHub action that requires approval
+* Approve the action (or ask somebody who has the necessary permissions to approve)
+* Wait until build is complete and release is on pypi
+* Set the next dev version in `pyproject.toml` (e.g. `version = "0.4.0-dev"`)
+
 ## License
 PyCaprio is under the MIT license. Check it out [here](https://opensource.org/licenses/MIT).
 
