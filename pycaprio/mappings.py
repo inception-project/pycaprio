@@ -1,2 +1,2 @@
 # flake8: noqa
-from pycaprio.core.mappings import InceptionFormat, DocumentState, AnnotationState  # pragma: no cover
+from pycaprio.core.mappings import InceptionFormat, DocumentState, AnnotationState, RoleType  # pragma: no cover
