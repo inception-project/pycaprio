@@ -5,7 +5,7 @@ build-backend = "uv_build"
 [project]
 name = "pycaprio"
 version = "0.4.0.dev0"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 authors = [
     { name = "The INCEpTION Project" },
     { name = "Javier Luna Molina" },
@@ -17,16 +17,20 @@ readme = "README.md"
 license = "MIT"
 keywords = []
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Operating System :: OS Independent",
     "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing :: Linguistic",
+    "Typing :: Typed",
 ]
 dependencies = [
     "requests>=2.32.3,<3",
@@ -36,7 +40,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "ruff~=0.9.10",
-    "pytest>=8.3.5,<9",
+    "pytest>=9.0.3,<10",
     "pytest-mock==3.14.0",
     "requests-mock==1.12.1",
     "coverage>=7.6.12,<8",
@@ -71,7 +75,7 @@ docs = "mkdocs serve"
 
 [tool.ruff]
 line-length = 120
-target-version = "py39"
+target-version = "py310"
 
 [tool.ruff.lint]
 # Equivalent to flake8's E9,F63,F7,F82 (syntax errors and undefined names)
