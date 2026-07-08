@@ -59,3 +59,13 @@ class DocumentState:
     ANNOTATION_COMPLETE = "ANNOTATION-COMPLETE"
     CURATION_IN_PROGRESS = "CURATION-IN-PROGRESS"
     CURATION_COMPLETE = "CURATION-COMPLETE"
+
+
+class RoleType:
+    # Project role names as used by the INCEpTION permission API. These are the *names* of the
+    # PermissionLevel enum constants (the API reads them via PermissionLevel.valueOf(...) and returns
+    # them via PermissionLevel.name()), NOT the enum ids ("user"/"curator"/"admin").
+    # https://github.com/inception-project/inception/blob/main/inception/inception-model/src/main/java/de/tudarmstadt/ukp/clarin/webanno/model/PermissionLevel.java
+    ANNOTATOR = "ANNOTATOR"
+    CURATOR = "CURATOR"
+    MANAGER = "MANAGER"

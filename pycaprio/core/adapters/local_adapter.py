@@ -142,7 +142,9 @@ class LocalInceptionAdapter(BaseInceptionAdapter):
 
         return annotation_list
 
-    def annotation(self, project: Union[Project, int, str], document: Union[Document, int, str], user_name: str) -> bytes:
+    def annotation(
+        self, project: Union[Project, int, str], document: Union[Document, int, str], user_name: str
+    ) -> bytes:
         """
         Returns the content of an annotation.
         NOTE: Returns the annotation in JSON CAS format only.
@@ -218,4 +220,13 @@ class LocalInceptionAdapter(BaseInceptionAdapter):
         raise NotImplementedError
 
     def delete_curation(self, project, document):
+        raise NotImplementedError
+
+    def list_roles(self, project, user_id):
+        raise NotImplementedError
+
+    def assign_roles(self, project, user_id, roles):
+        raise NotImplementedError
+
+    def delete_roles(self, project, user_id, roles):
         raise NotImplementedError

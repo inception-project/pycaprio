@@ -72,12 +72,17 @@ class RetryableInceptionClient(BaseInceptionClient):
         return self.request("get", url, params=params)
 
     def post(
-        self, url: str, data: Optional[dict] = None, form_data: Optional[dict] = None, files: Optional[dict] = None
+        self,
+        url: str,
+        data: Optional[dict] = None,
+        form_data: Optional[dict] = None,
+        files: Optional[dict] = None,
+        params: Optional[dict] = None,
     ) -> requests.Response:
-        return self.request("post", url, data=data, form_data=form_data, files=files)
+        return self.request("post", url, data=data, form_data=form_data, files=files, params=params)
 
-    def delete(self, url: str) -> requests.Response:
-        return self.request("delete", url)
+    def delete(self, url: str, params: Optional[dict] = None) -> requests.Response:
+        return self.request("delete", url, params=params)
 
     def request(self, method: str, url: str, **kwargs) -> requests.Response:
         retries = 0
@@ -96,7 +101,13 @@ class RetryableInceptionClient(BaseInceptionClient):
         raise last_error
 
     def _request(
-        self, method: str, url: str, form_data: Optional[dict] = None, files: Optional[dict] = None, **kwargs
+        self,
+        method: str,
+        url: str,
+        form_data: Optional[dict] = None,
+        files: Optional[dict] = None,
+        params: Optional[dict] = None,
+        **kwargs,
     ) -> requests.Response:
         form_data = form_data or {}
         files = files or {}
@@ -108,12 +119,18 @@ class RetryableInceptionClient(BaseInceptionClient):
                 io_stream.seek(0, io.SEEK_SET)
 
         if form_data or files:  # Correctly encode multiform data
+            # 'params' is the query string, orthogonal to the multipart body, so it must be forwarded
+            # here too. ('data' is intentionally not forwarded: it would collide with the multipart body.)
             multipart_encoder = MultipartEncoder(fields={**form_data, **files})
             response = self.session.request(
-                method, url, data=multipart_encoder, headers={"Content-Type": multipart_encoder.content_type}
+                method,
+                url,
+                data=multipart_encoder,
+                params=params,
+                headers={"Content-Type": multipart_encoder.content_type},
             )
         else:
-            response = self.session.request(method, url, **kwargs)
+            response = self.session.request(method, url, params=params, **kwargs)
         if 200 <= response.status_code < 300:
             return response
         else:

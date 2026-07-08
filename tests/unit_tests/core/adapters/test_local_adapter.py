@@ -155,7 +155,6 @@ def test_document_with_objects(local_adapter: LocalInceptionAdapter):
 
 
 def test_annotations(local_adapter: LocalInceptionAdapter, mock_project_data: dict):
-
     with patch("os.path.exists") as mock_exists, patch("zipfile.ZipFile") as mock_zipfile:
         mock_exists.return_value = True
         mock_zipfile.return_value.__enter__.return_value.open.return_value.__enter__.return_value.read.return_value = (
@@ -190,6 +189,7 @@ def test_annotations_with_objects(local_adapter: LocalInceptionAdapter, mock_pro
         assert len(annotations) == 2
         assert annotations[0].project_id == "test-project"
         assert annotations[0].document_id == "doc1.txt"
+
 
 def test_annotation(local_adapter: LocalInceptionAdapter):
     with patch("os.path.exists") as mock_exists, patch("zipfile.ZipFile") as mock_zipfile:

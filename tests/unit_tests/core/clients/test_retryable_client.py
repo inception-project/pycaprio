@@ -1,3 +1,4 @@
+import io
 from unittest.mock import Mock
 from urllib.parse import urlparse
 
@@ -119,3 +120,11 @@ def test_client_missing_ca_bundle_raises(mock_host, mock_authentication, tmp_pat
     missing = tmp_path / "does-not-exist.pem"
     with pytest.raises(ValueError):
         RetryableInceptionClient(mock_host, mock_authentication, ca_bundle=str(missing))
+
+
+def test_request_forwards_params_alongside_multipart_body(mocker, client: RetryableInceptionClient):
+    # 'params' is the query string and is orthogonal to a multipart body, so it must still be
+    # forwarded when form_data/files trigger the multipart-encoding branch of _request.
+    session_request = mocker.patch.object(client.session, "request", return_value=Mock(status_code=200))
+    client.post("test-url", files={"content": ("data", io.BytesIO(b"data"))}, params={"format": "text"})
+    assert session_request.call_args.kwargs["params"] == {"format": "text"}

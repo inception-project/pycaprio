@@ -44,7 +44,12 @@ class BaseInceptionClient(metaclass=ABCMeta):
 
     @abstractmethod
     def post(
-        self, url: str, data: Optional[dict] = None, form_data: Optional[dict] = None, files: Optional[dict] = None
+        self,
+        url: str,
+        data: Optional[dict] = None,
+        form_data: Optional[dict] = None,
+        files: Optional[dict] = None,
+        params: Optional[dict] = None,
     ) -> requests.Response:
         """
         Issues an authenticated POST request to Inception
@@ -52,15 +57,17 @@ class BaseInceptionClient(metaclass=ABCMeta):
         :param data: Form-encoded body fields
         :param form_data: Multipart form fields
         :param files: Files to be uploaded.
+        :param params: query string parameters
         :return: Response
         """
         pass  # pragma: no cover
 
     @abstractmethod
-    def delete(self, url: str) -> requests.Response:
+    def delete(self, url: str, params: Optional[dict] = None) -> requests.Response:
         """
         Issues an authenticated DELETE request to Inception
         :param url: relative url to make request
+        :param params: query string parameters
         :return: Response
         """
         pass  # pragma: no cover

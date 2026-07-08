@@ -14,8 +14,10 @@ TEST_PASSWORD = os.getenv("TEST_PASSWORD", default="test-remote")
 TEST_PROJECT_PREFIX = os.getenv("TEST_PROJECT_PREFIX", default="testpycap")
 TEST_CONTENT = "this is a whatever whatever test string"
 
+
 def gen_test_name():
     return f"{TEST_PROJECT_PREFIX}{random.randint(0, 1000000000)}"
+
 
 def is_inception_alive(endpoint):
     try:
@@ -24,11 +26,13 @@ def is_inception_alive(endpoint):
     except requests.exceptions.RequestException:
         return False
 
+
 def is_api_accessible(endpoint):
     try:
         return requests.get(f"{endpoint}/swagger-ui/index.html").status_code == 200
     except requests.exceptions.RequestException:
         return False
+
 
 def is_docker_daemon_running():
     try:
@@ -38,13 +42,14 @@ def is_docker_daemon_running():
     except docker.errors.DockerException:
         return False
 
+
 @pytest.fixture(scope="session", autouse=True)
 def inception_container():
     if not is_docker_daemon_running():
         pytest.skip("Docker daemon is not running. Skipping integration tests.")
-    
+
     # Generate bcrypt hash from TEST_PASSWORD
-    bcrypt_hash = bcrypt.hashpw(TEST_PASSWORD.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    bcrypt_hash = bcrypt.hashpw(TEST_PASSWORD.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
     bcrypt_hash = f"{{bcrypt}}{bcrypt_hash}"
     escaped_bcrypt_hash = bcrypt_hash.replace("$", "\\$")
 
@@ -54,12 +59,14 @@ def inception_container():
     container = DockerContainer("ghcr.io/inception-project/inception:latest")
     container.with_env(
         "JAVA_OPTS",
-        " ".join([
-            "-Dremote-api.enabled=true",
-            f"-Dsecurity.default-admin-username={TEST_USERNAME}",
-            f"-Dsecurity.default-admin-password={escaped_bcrypt_hash}",
-            "-Dsecurity.default-admin-remote-access=true"
-        ])
+        " ".join(
+            [
+                "-Dremote-api.enabled=true",
+                f"-Dsecurity.default-admin-username={TEST_USERNAME}",
+                f"-Dsecurity.default-admin-password={escaped_bcrypt_hash}",
+                "-Dsecurity.default-admin-remote-access=true",
+            ]
+        ),
     )
     container.with_exposed_ports(8080)
     container.start()
@@ -78,6 +85,7 @@ def inception_container():
     yield container, inception_endpoint
     container.stop()
 
+
 @pytest.fixture(scope="session", autouse=True)
 def pycaprio(inception_container):
     container, inception_endpoint = inception_container
@@ -91,17 +99,26 @@ def pycaprio(inception_container):
     yield client
     [client.api.delete_project(p) for p in client.api.projects() if p.project_name.startswith(TEST_PROJECT_PREFIX)]
 
+
 @pytest.fixture
 def test_name():
     return gen_test_name()
+
+
+@pytest.fixture
+def test_user():
+    return TEST_USERNAME
+
 
 @pytest.fixture(scope="session", autouse=True)
 def test_project(pycaprio):
     return pycaprio.api.create_project(gen_test_name())
 
+
 @pytest.fixture
 def test_io():
     return io.StringIO(TEST_CONTENT)
+
 
 @pytest.fixture
 def test_document(pycaprio, test_project):

@@ -415,7 +415,13 @@ def test_curation_has_document_id_injected_creation(
     ],
 )
 def test_content_upload_passes_content_as_named_file_tuple(
-    function, params, resource, mock_http_adapter: HttpInceptionAdapter, mock_http_response: Mock, serializations: dict, mock_io: IO
+    function,
+    params,
+    resource,
+    mock_http_adapter: HttpInceptionAdapter,
+    mock_http_response: Mock,
+    serializations: dict,
+    mock_io: IO,
 ):
     # The client's _request unpacks every files value as a (name, stream) tuple, so all content
     # uploads must pass files={"content": (name, stream)} rather than a bare stream.
@@ -439,3 +445,98 @@ def test_content_upload_passes_content_as_named_file_tuple(
 )
 def test_get_object_id_value_ok(mock_http_adapter, value, expected_value):
     assert mock_http_adapter._get_object_id(value) == expected_value
+
+
+@pytest.mark.parametrize(
+    "route, verb, function, parameters",
+    [
+        ("/projects/1/permissions/test-user", "get", HttpInceptionAdapter.list_roles, (1, "test-user")),
+        ("/projects/1/permissions/test-user", "get", HttpInceptionAdapter.list_roles, (test_project, "test-user")),
+        (
+            "/projects/1/permissions/test-user",
+            "post",
+            HttpInceptionAdapter.assign_roles,
+            (1, "test-user", ["MANAGER"]),
+        ),
+        (
+            "/projects/1/permissions/test-user",
+            "delete",
+            HttpInceptionAdapter.delete_roles,
+            (test_project, "test-user", ["MANAGER"]),
+        ),
+    ],
+)
+def test_role_methods_good_route(route, verb, function, parameters, mock_http_adapter: HttpInceptionAdapter):
+    function(mock_http_adapter, *parameters)
+    assert getattr(mock_http_adapter.client, verb).call_args[0][0] == route
+
+
+@pytest.mark.parametrize(
+    "function, parameters",
+    [
+        (HttpInceptionAdapter.list_roles, (1, "test-user")),
+        (HttpInceptionAdapter.assign_roles, (1, "test-user", ["MANAGER"])),
+        (HttpInceptionAdapter.delete_roles, (1, "test-user", ["MANAGER"])),
+    ],
+)
+def test_role_methods_return_list(function, parameters, mock_http_adapter: HttpInceptionAdapter):
+    assert isinstance(function(mock_http_adapter, *parameters), list)
+
+
+def test_list_roles_returns_role_names(mock_http_adapter: HttpInceptionAdapter, mock_http_response: Mock):
+    mock_http_response.json.return_value = {"body": [{"role": "MANAGER"}, {"role": "CURATOR"}]}
+    mock_http_adapter.client.get.return_value = mock_http_response
+    assert mock_http_adapter.list_roles(1, "test-user") == ["MANAGER", "CURATOR"]
+
+
+def test_role_methods_tolerate_empty_response_body(mock_http_adapter: HttpInceptionAdapter, mock_http_response: Mock):
+    # A mutating permission endpoint may answer with no content; that must yield [] rather than
+    # a JSONDecodeError from response.json() on an empty body.
+    mock_http_response.content = b""
+    mock_http_response.json.side_effect = ValueError("No JSON object could be decoded")
+    mock_http_adapter.client.delete.return_value = mock_http_response
+    assert mock_http_adapter.delete_roles(1, "test-user", ["MANAGER"]) == []
+
+
+def test_assign_roles_passes_roles_as_query_params(mock_http_adapter: HttpInceptionAdapter):
+    # The API reads 'roles' as a query parameter, so it must be sent via params, not the form body.
+    mock_http_adapter.assign_roles(1, "test-user", ["MANAGER", "CURATOR"])
+    call = mock_http_adapter.client.post.call_args
+    assert call.kwargs.get("params") == {"roles": ["MANAGER", "CURATOR"]}
+    assert call.kwargs.get("data") is None
+
+
+def test_delete_roles_passes_roles_as_query_params(mock_http_adapter: HttpInceptionAdapter):
+    mock_http_adapter.delete_roles(1, "test-user", ["MANAGER"])
+    assert mock_http_adapter.client.delete.call_args.kwargs.get("params") == {"roles": ["MANAGER"]}
+
+
+def test_role_methods_url_encode_user_id(mock_http_adapter: HttpInceptionAdapter):
+    mock_http_adapter.list_roles(1, "user/with space")
+    assert mock_http_adapter.client.get.call_args[0][0] == "/projects/1/permissions/user%2Fwith%20space"
+
+
+def test_annotation_methods_url_encode_user_name(mock_http_adapter: HttpInceptionAdapter):
+    encoded = "user%2Fwith%20space"
+
+    mock_http_adapter.annotation(1, 1, "user/with space")
+    assert mock_http_adapter.client.get.call_args[0][0] == f"/projects/1/documents/1/annotations/{encoded}"
+
+    mock_http_adapter.delete_annotation(1, 1, "user/with space")
+    assert mock_http_adapter.client.delete.call_args[0][0] == f"/projects/1/documents/1/annotations/{encoded}"
+
+    mock_http_adapter.update_annotation_state(1, 1, "user/with space", "NEW")
+    assert mock_http_adapter.client.post.call_args[0][0] == f"/projects/1/documents/1/annotations/{encoded}/state"
+
+
+def test_assign_roles_empty_list_raises(mock_http_adapter: HttpInceptionAdapter):
+    # An empty list would be dropped from the query string, so reject it client-side.
+    with pytest.raises(ValueError):
+        mock_http_adapter.assign_roles(1, "test-user", [])
+    mock_http_adapter.client.post.assert_not_called()
+
+
+def test_delete_roles_empty_list_raises(mock_http_adapter: HttpInceptionAdapter):
+    with pytest.raises(ValueError):
+        mock_http_adapter.delete_roles(1, "test-user", [])
+    mock_http_adapter.client.delete.assert_not_called()
