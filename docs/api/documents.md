@@ -43,6 +43,12 @@ Uploads a document to a project in INCEpTION. It requires the Id of the project,
 You can specify the document's format via `document_format` (defaults to `webanno`).
 You can specify the document's state via `document_state` (defaults to `NEW`).
 
+You can set the name recorded for the uploaded file via `filename` (e.g. `document.txt`). This does
+not affect how the content is parsed — the format is determined by `document_format` (the format id),
+not by the file name or extension. When omitted, the base name of the `content` file object is used
+if it has one (e.g. a file opened with `open(...)`); if neither an explicit `filename` nor a derivable
+name is available (e.g. `content` is an in-memory `io.BytesIO`), a `ValueError` is raised.
+
 You can provide a `Project` instance instead of a `project_id` as well.
 
 Example:

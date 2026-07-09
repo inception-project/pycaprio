@@ -1,6 +1,6 @@
 from abc import ABCMeta
 from abc import abstractmethod
-from typing import IO, Union
+from typing import IO, Optional, Union
 
 from typing import List
 
@@ -103,6 +103,7 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
         content: IO,
         document_format: str = InceptionFormat.DEFAULT,
         document_state: str = DocumentState.DEFAULT,
+        filename: Optional[str] = None,
     ) -> Document:
         """
         Creates a Document
@@ -111,6 +112,10 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
         :param content: Content of the Document.
         :param document_format: Document format.
         :param document_state: State of the Document.
+        :param filename: Name recorded for the uploaded file. Does not affect parsing; the format is
+            determined by ``document_format`` (the format id), not by this name. Defaults to the base
+            name of the ``content`` file object if it has one; if neither is available a ``ValueError``
+            is raised.
         :return: Recently created Document
         """
         pass  # pragma: no cover

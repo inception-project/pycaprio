@@ -1,3 +1,4 @@
+import os
 from typing import IO, Union, List, Optional
 from urllib.parse import quote
 
@@ -16,6 +17,27 @@ from pycaprio.core.schemas.annotation import AnnotationSchema
 from pycaprio.core.schemas.document import DocumentSchema
 from pycaprio.core.schemas.project import ProjectSchema
 from pycaprio.core.schemas.curation import CurationSchema
+
+
+def _resolve_document_filename(content: IO, filename: Optional[str] = None) -> str:
+    """
+    Determines the file name to send for a document upload. This only sets the name recorded for the
+    uploaded file; the content format is determined by the format id sent alongside it, not by this
+    name or its extension. An explicit ``filename`` wins; otherwise the base name of the passed file
+    object is used (if it is a real, named file). Raises ``ValueError`` when neither is available,
+    rather than silently uploading under a meaningless placeholder name.
+    """
+    if filename:
+        return filename
+    name = getattr(content, "name", None)
+    if isinstance(name, (str, bytes)) and name:
+        base = os.path.basename(name)  # accepts str or bytes; a bytes path yields a bytes basename
+        if base:
+            return os.fsdecode(base)
+    raise ValueError(
+        "Could not determine a file name for the document upload. Pass an explicit 'filename', or "
+        "provide a 'content' file object with a 'name' attribute (e.g. one opened with open(...))."
+    )
 
 
 class HttpInceptionAdapter(BaseInceptionAdapter):
@@ -109,12 +131,13 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
         content: IO,
         document_format: str = InceptionFormat.DEFAULT,
         document_state: str = DocumentState.DEFAULT,
+        filename: Optional[str] = None,
     ) -> Document:
         project_id = self._get_object_id(project)
         response = self.client.post(
             f"/projects/{project_id}/documents",
             form_data={"name": document_name, "format": document_format, "state": document_state},
-            files={"content": ("data", content)},
+            files={"content": (_resolve_document_filename(content, filename), content)},
         )
         document = DocumentSchema().load(response.json()["body"], many=False)
         document.project_id = project_id
