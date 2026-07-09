@@ -8,6 +8,7 @@ import bcrypt
 from testcontainers.core.container import DockerContainer
 from pycaprio import Pycaprio
 import docker
+import docker.errors
 
 TEST_USERNAME = os.getenv("TEST_USERNAME", default="test-remote")
 TEST_PASSWORD = os.getenv("TEST_PASSWORD", default="test-remote")

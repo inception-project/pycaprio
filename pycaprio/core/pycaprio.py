@@ -35,14 +35,20 @@ class Pycaprio:
         """
         inception_host = inception_host or os.getenv("INCEPTION_HOST")
         if inception_host:
-            authentication = authentication or (os.getenv("INCEPTION_USERNAME"), os.getenv("INCEPTION_PASSWORD"))
-            if not all(authentication):
+            if authentication:
+                username, password = authentication
+            else:
+                username = os.getenv("INCEPTION_USERNAME")
+                password = os.getenv("INCEPTION_PASSWORD")
+            if not (username and password):
                 raise ConfigurationNotProvided(
                     "Authentication was not provided. "
                     "You can set it via environment variables as 'INCEPTION_USERNAME' and 'INCEPTION_PASSWORD'"
                 )
 
-            self.api = HttpInceptionAdapter(inception_host, authentication, ca_bundle=ca_bundle, verify=verify)
+            self.api = HttpInceptionAdapter(
+                inception_host, (username, password), ca_bundle=ca_bundle, verify=verify
+            )
         elif local_projects_dir:
             self.api = LocalInceptionAdapter(local_projects_dir)
         else:
