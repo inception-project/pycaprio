@@ -27,6 +27,6 @@ def mock_http_client(mock_http_response):
 
 @pytest.fixture
 def mock_http_adapter(mock_http_client):
-    adapter = HttpInceptionAdapter("test-host", (None, None))
+    adapter = HttpInceptionAdapter("test-host", ("test-user", "test-password"))
     adapter.client = mock_http_client
     return adapter

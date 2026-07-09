@@ -1,4 +1,4 @@
-from typing import IO
+from typing import IO, Callable, cast
 from unittest.mock import Mock
 
 import pytest
@@ -6,6 +6,12 @@ import pytest
 from pycaprio.mappings import AnnotationState
 from pycaprio.core.adapters.http_adapter import HttpInceptionAdapter
 from pycaprio.core.objects import Project, Document, Annotation, Curation
+
+
+def mock_client(adapter: HttpInceptionAdapter) -> Mock:
+    """The adapter's client is a Mock in these tests; expose it as such for the type checker."""
+    return cast(Mock, adapter.client)
+
 
 test_project = Project(1, "")
 test_document = Document(test_project.project_id, 1, "", "")
@@ -61,7 +67,7 @@ test_curation = Curation(test_project.project_id, test_document.document_id, "te
 )
 def test_list_resources_gets_good_route(route, verb, function, parameters, mock_http_adapter: HttpInceptionAdapter):
     function(mock_http_adapter, *parameters)
-    assert getattr(mock_http_adapter.client, verb).call_args[0][0] == route
+    assert getattr(mock_client(mock_http_adapter), verb).call_args[0][0] == route
 
 
 @pytest.mark.parametrize(
@@ -86,16 +92,16 @@ def test_import_project_good_url(
     mock_http_adapter: HttpInceptionAdapter, mock_io: IO, mock_http_response: Mock, serialized_project: dict
 ):
     mock_http_response.json.return_value = {"body": serialized_project}
-    mock_http_adapter.client.post.return_value = mock_http_response
+    mock_client(mock_http_adapter).post.return_value = mock_http_response
     mock_http_adapter.import_project(mock_io)
-    assert mock_http_adapter.client.post.call_args[0][0] == "/projects/import"
+    assert mock_client(mock_http_adapter).post.call_args[0][0] == "/projects/import"
 
 
 def test_import_project_returns_project(
     mock_http_adapter: HttpInceptionAdapter, mock_io: IO, mock_http_response: Mock, serialized_project: dict
 ):
     mock_http_response.json.return_value = {"body": serialized_project}
-    mock_http_adapter.client.post.return_value = mock_http_response
+    mock_client(mock_http_adapter).post.return_value = mock_http_response
     project = mock_http_adapter.import_project(mock_io)
     assert isinstance(project, Project)
 
@@ -125,7 +131,7 @@ def test_import_project_returns_project(
 )
 def test_get_single_resource_route_ok(
     route: str,
-    function: callable,
+    function: Callable[..., object],
     params: tuple,
     resource: dict,
     mock_http_adapter: HttpInceptionAdapter,
@@ -133,16 +139,16 @@ def test_get_single_resource_route_ok(
     serializations: dict,
 ):
     mock_http_response.json.return_value = {"body": serializations[resource]}
-    mock_http_adapter.client.get.return_value = mock_http_response
+    mock_client(mock_http_adapter).get.return_value = mock_http_response
     function(mock_http_adapter, *params)
-    assert mock_http_adapter.client.get.call_args[0][0] == route
+    assert mock_client(mock_http_adapter).get.call_args[0][0] == route
 
 
 def test_get_project_returns_good_instance(
     mock_http_adapter: HttpInceptionAdapter, mock_http_response: Mock, serialized_project: dict
 ):
     mock_http_response.json.return_value = {"body": serialized_project}
-    mock_http_adapter.client.get.return_value = mock_http_response
+    mock_client(mock_http_adapter).get.return_value = mock_http_response
     response = mock_http_adapter.project(1)
     assert isinstance(response, Project)
 
@@ -162,7 +168,7 @@ def test_resource_returns_bytes(
     mock_http_adapter: HttpInceptionAdapter, mock_http_response: Mock, function: str, params: tuple
 ):
     mock_http_response.content = bytes()
-    mock_http_adapter.client.get.return_value = mock_http_response
+    mock_client(mock_http_adapter).get.return_value = mock_http_response
     response = getattr(HttpInceptionAdapter, function)(mock_http_adapter, *params)
     assert isinstance(response, bytes)
 
@@ -237,7 +243,7 @@ def test_resource_returns_bytes(
 )
 def test_resource_creation_good_route(
     route: str,
-    function: callable,
+    function: Callable[..., object],
     params: tuple,
     resource: str,
     mock_http_adapter: HttpInceptionAdapter,
@@ -245,9 +251,9 @@ def test_resource_creation_good_route(
     serializations: dict,
 ):
     mock_http_response.json.return_value = {"body": serializations[resource]}
-    mock_http_adapter.client.post.return_value = mock_http_response
+    mock_client(mock_http_adapter).post.return_value = mock_http_response
     function(mock_http_adapter, *params)
-    assert mock_http_adapter.client.post.call_args[0][0] == route
+    assert mock_client(mock_http_adapter).post.call_args[0][0] == route
 
 
 @pytest.mark.parametrize(
@@ -306,7 +312,7 @@ def test_resource_creation_good_route(
 )
 def test_resource_creation_returns_resource_instance(
     route: str,
-    function: callable,
+    function: Callable[..., object],
     params: tuple,
     resource: str,
     mock_http_adapter: HttpInceptionAdapter,
@@ -315,7 +321,7 @@ def test_resource_creation_returns_resource_instance(
     deserializations: dict,
 ):
     mock_http_response.json.return_value = {"body": serializations[resource]}
-    mock_http_adapter.client.post.return_value = mock_http_response
+    mock_client(mock_http_adapter).post.return_value = mock_http_response
     response = function(mock_http_adapter, *params)
     assert isinstance(response, deserializations[resource].__class__)
 
@@ -325,7 +331,7 @@ def test_document_has_project_id_injected_document_list(
 ):
     test_project_id = 1
     mock_http_response.json.return_value = {"body": [serialized_document]}
-    mock_http_adapter.client.get.return_value = mock_http_response
+    mock_client(mock_http_adapter).get.return_value = mock_http_response
     response = mock_http_adapter.documents(test_project_id)
     assert response[0].project_id == test_project_id
 
@@ -335,8 +341,8 @@ def test_document_has_project_id_injected_creation(
 ):
     test_project_id = 1
     mock_http_response.json.return_value = {"body": serialized_document}
-    mock_http_adapter.client.post.return_value = mock_http_response
-    response = mock_http_adapter.create_document(test_project_id, "test-name", None)
+    mock_client(mock_http_adapter).post.return_value = mock_http_response
+    response = mock_http_adapter.create_document(test_project_id, "test-name", cast(IO, None))
     assert response.project_id == test_project_id
 
 
@@ -346,7 +352,7 @@ def test_annotation_has_project_id_injected_annotation_list(
     test_project_id = 1
     test_document_id = 2
     mock_http_response.json.return_value = {"body": [serialized_annotation]}
-    mock_http_adapter.client.get.return_value = mock_http_response
+    mock_client(mock_http_adapter).get.return_value = mock_http_response
     response = mock_http_adapter.annotations(test_project_id, test_document_id)
     assert response[0].project_id == test_project_id
 
@@ -357,7 +363,7 @@ def test_annotation_has_document_id_injected_annotation_list(
     test_project_id = 1
     test_document_id = 2
     mock_http_response.json.return_value = {"body": [serialized_annotation]}
-    mock_http_adapter.client.get.return_value = mock_http_response
+    mock_client(mock_http_adapter).get.return_value = mock_http_response
     response = mock_http_adapter.annotations(test_project_id, test_document_id)
     assert response[0].document_id == test_document_id
 
@@ -368,8 +374,8 @@ def test_annotation_has_project_id_injected_creation(
     test_project_id = 1
     test_document_id = 2
     mock_http_response.json.return_value = {"body": serialized_annotation}
-    mock_http_adapter.client.post.return_value = mock_http_response
-    response = mock_http_adapter.create_annotation(test_project_id, test_document_id, "test-name", None)
+    mock_client(mock_http_adapter).post.return_value = mock_http_response
+    response = mock_http_adapter.create_annotation(test_project_id, test_document_id, "test-name", cast(IO, None))
     assert response.project_id == test_project_id
 
 
@@ -379,8 +385,8 @@ def test_annotation_has_document_id_injected_creation(
     test_project_id = 1
     test_document_id = 2
     mock_http_response.json.return_value = {"body": serialized_annotation}
-    mock_http_adapter.client.post.return_value = mock_http_response
-    response = mock_http_adapter.create_annotation(test_project_id, test_document_id, "test-name", None)
+    mock_client(mock_http_adapter).post.return_value = mock_http_response
+    response = mock_http_adapter.create_annotation(test_project_id, test_document_id, "test-name", cast(IO, None))
     assert response.document_id == test_document_id
 
 
@@ -390,8 +396,8 @@ def test_curation_has_project_id_injected_creation(
     test_project_id = 1
     test_document_id = 2
     mock_http_response.json.return_value = {"body": serialized_curation}
-    mock_http_adapter.client.post.return_value = mock_http_response
-    response = mock_http_adapter.create_curation(test_project_id, test_document_id, "test-state", "test-format")
+    mock_client(mock_http_adapter).post.return_value = mock_http_response
+    response = mock_http_adapter.create_curation(test_project_id, test_document_id, cast(IO, None), "test-format")
     assert response.project_id == test_project_id
 
 
@@ -401,8 +407,8 @@ def test_curation_has_document_id_injected_creation(
     test_project_id = 1
     test_document_id = 2
     mock_http_response.json.return_value = {"body": serialized_curation}
-    mock_http_adapter.client.post.return_value = mock_http_response
-    response = mock_http_adapter.create_curation(test_project_id, test_document_id, "test-state", "test-format")
+    mock_client(mock_http_adapter).post.return_value = mock_http_response
+    response = mock_http_adapter.create_curation(test_project_id, test_document_id, cast(IO, None), "test-format")
     assert response.document_id == test_document_id
 
 
@@ -426,9 +432,9 @@ def test_content_upload_passes_content_as_named_file_tuple(
     # The client's _request unpacks every files value as a (name, stream) tuple, so all content
     # uploads must pass files={"content": (name, stream)} rather than a bare stream.
     mock_http_response.json.return_value = {"body": serializations[resource]}
-    mock_http_adapter.client.post.return_value = mock_http_response
+    mock_client(mock_http_adapter).post.return_value = mock_http_response
     function(mock_http_adapter, *params, mock_io)
-    content = mock_http_adapter.client.post.call_args.kwargs["files"]["content"]
+    content = mock_client(mock_http_adapter).post.call_args.kwargs["files"]["content"]
     _, stream = content
     assert stream is mock_io
 
@@ -468,7 +474,7 @@ def test_get_object_id_value_ok(mock_http_adapter, value, expected_value):
 )
 def test_role_methods_good_route(route, verb, function, parameters, mock_http_adapter: HttpInceptionAdapter):
     function(mock_http_adapter, *parameters)
-    assert getattr(mock_http_adapter.client, verb).call_args[0][0] == route
+    assert getattr(mock_client(mock_http_adapter), verb).call_args[0][0] == route
 
 
 @pytest.mark.parametrize(
@@ -485,7 +491,7 @@ def test_role_methods_return_list(function, parameters, mock_http_adapter: HttpI
 
 def test_list_roles_returns_role_names(mock_http_adapter: HttpInceptionAdapter, mock_http_response: Mock):
     mock_http_response.json.return_value = {"body": [{"role": "MANAGER"}, {"role": "CURATOR"}]}
-    mock_http_adapter.client.get.return_value = mock_http_response
+    mock_client(mock_http_adapter).get.return_value = mock_http_response
     assert mock_http_adapter.list_roles(1, "test-user") == ["MANAGER", "CURATOR"]
 
 
@@ -494,49 +500,49 @@ def test_role_methods_tolerate_empty_response_body(mock_http_adapter: HttpIncept
     # a JSONDecodeError from response.json() on an empty body.
     mock_http_response.content = b""
     mock_http_response.json.side_effect = ValueError("No JSON object could be decoded")
-    mock_http_adapter.client.delete.return_value = mock_http_response
+    mock_client(mock_http_adapter).delete.return_value = mock_http_response
     assert mock_http_adapter.delete_roles(1, "test-user", ["MANAGER"]) == []
 
 
 def test_assign_roles_passes_roles_as_query_params(mock_http_adapter: HttpInceptionAdapter):
     # The API reads 'roles' as a query parameter, so it must be sent via params, not the form body.
     mock_http_adapter.assign_roles(1, "test-user", ["MANAGER", "CURATOR"])
-    call = mock_http_adapter.client.post.call_args
+    call = mock_client(mock_http_adapter).post.call_args
     assert call.kwargs.get("params") == {"roles": ["MANAGER", "CURATOR"]}
     assert call.kwargs.get("data") is None
 
 
 def test_delete_roles_passes_roles_as_query_params(mock_http_adapter: HttpInceptionAdapter):
     mock_http_adapter.delete_roles(1, "test-user", ["MANAGER"])
-    assert mock_http_adapter.client.delete.call_args.kwargs.get("params") == {"roles": ["MANAGER"]}
+    assert mock_client(mock_http_adapter).delete.call_args.kwargs.get("params") == {"roles": ["MANAGER"]}
 
 
 def test_role_methods_url_encode_user_id(mock_http_adapter: HttpInceptionAdapter):
     mock_http_adapter.list_roles(1, "user/with space")
-    assert mock_http_adapter.client.get.call_args[0][0] == "/projects/1/permissions/user%2Fwith%20space"
+    assert mock_client(mock_http_adapter).get.call_args[0][0] == "/projects/1/permissions/user%2Fwith%20space"
 
 
 def test_annotation_methods_url_encode_user_name(mock_http_adapter: HttpInceptionAdapter):
     encoded = "user%2Fwith%20space"
 
     mock_http_adapter.annotation(1, 1, "user/with space")
-    assert mock_http_adapter.client.get.call_args[0][0] == f"/projects/1/documents/1/annotations/{encoded}"
+    assert mock_client(mock_http_adapter).get.call_args[0][0] == f"/projects/1/documents/1/annotations/{encoded}"
 
     mock_http_adapter.delete_annotation(1, 1, "user/with space")
-    assert mock_http_adapter.client.delete.call_args[0][0] == f"/projects/1/documents/1/annotations/{encoded}"
+    assert mock_client(mock_http_adapter).delete.call_args[0][0] == f"/projects/1/documents/1/annotations/{encoded}"
 
     mock_http_adapter.update_annotation_state(1, 1, "user/with space", "NEW")
-    assert mock_http_adapter.client.post.call_args[0][0] == f"/projects/1/documents/1/annotations/{encoded}/state"
+    assert mock_client(mock_http_adapter).post.call_args[0][0] == f"/projects/1/documents/1/annotations/{encoded}/state"
 
 
 def test_assign_roles_empty_list_raises(mock_http_adapter: HttpInceptionAdapter):
     # An empty list would be dropped from the query string, so reject it client-side.
     with pytest.raises(ValueError):
         mock_http_adapter.assign_roles(1, "test-user", [])
-    mock_http_adapter.client.post.assert_not_called()
+    mock_client(mock_http_adapter).post.assert_not_called()
 
 
 def test_delete_roles_empty_list_raises(mock_http_adapter: HttpInceptionAdapter):
     with pytest.raises(ValueError):
         mock_http_adapter.delete_roles(1, "test-user", [])
-    mock_http_adapter.client.delete.assert_not_called()
+    mock_client(mock_http_adapter).delete.assert_not_called()

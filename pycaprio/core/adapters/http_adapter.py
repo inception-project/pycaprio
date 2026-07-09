@@ -276,14 +276,12 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
 
     @staticmethod
     def _get_object_id(o: Union[int, str, Project, Document, Annotation]) -> Union[int, str]:
-        object_id_mappings = {
-            Project: lambda p: p.project_id,
-            Document: lambda d: d.document_id,
-            Annotation: lambda a: a.user_name,
-        }
-        for object_class, mapper in object_id_mappings.items():
-            if isinstance(o, object_class):
-                return mapper(o)
+        if isinstance(o, Project):
+            return o.project_id
+        if isinstance(o, Document):
+            return o.document_id
+        if isinstance(o, Annotation):
+            return o.user_name
 
-        # If it is an unknown type, just return it.
+        # If it is an unknown type (e.g. a raw int/str id), just return it.
         return o
