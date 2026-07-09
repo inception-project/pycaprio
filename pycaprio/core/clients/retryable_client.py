@@ -86,19 +86,15 @@ class RetryableInceptionClient(BaseInceptionClient):
 
     def request(self, method: str, url: str, **kwargs) -> requests.Response:
         retries = 0
-        retry = False
-        last_error = None
-
-        while (retry and retries < self.max_retries) or retries == 0:
+        while True:
             time.sleep((2**retries) / 10)
             try:
                 return self._request(method, url, **kwargs)
             except InceptionBadResponse as bad_response_error:
-                last_error = bad_response_error
-                retry = method == "get" and bad_response_error.status_code in self.RETRY_STATUSES
-
-            retries += 1
-        raise last_error
+                retryable = method == "get" and bad_response_error.status_code in self.RETRY_STATUSES
+                retries += 1
+                if not retryable or retries >= self.max_retries:
+                    raise
 
     def _request(
         self,
