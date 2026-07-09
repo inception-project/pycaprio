@@ -171,6 +171,7 @@ class LocalInceptionAdapter(BaseInceptionAdapter):
         content,
         document_format=InceptionFormat.DEFAULT,
         document_state=DocumentState.DEFAULT,
+        filename=None,
     ):
         raise NotImplementedError
 

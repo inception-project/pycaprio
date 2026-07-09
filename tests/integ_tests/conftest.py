@@ -118,9 +118,13 @@ def test_project(pycaprio):
 
 @pytest.fixture
 def test_io():
-    return io.StringIO(TEST_CONTENT)
+    stream = io.StringIO(TEST_CONTENT)
+    stream.name = "test-document.txt"
+    return stream
 
 
 @pytest.fixture
 def test_document(pycaprio, test_project):
-    return pycaprio.api.create_document(test_project, gen_test_name(), io.StringIO(TEST_CONTENT))
+    return pycaprio.api.create_document(
+        test_project, gen_test_name(), io.StringIO(TEST_CONTENT), filename="test-document.txt"
+    )

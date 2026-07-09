@@ -1,3 +1,4 @@
+import io
 from typing import IO, Callable, cast
 from unittest.mock import Mock
 
@@ -12,6 +13,11 @@ def mock_client(adapter: HttpInceptionAdapter) -> Mock:
     """The adapter's client is a Mock in these tests; expose it as such for the type checker."""
     return cast(Mock, adapter.client)
 
+
+# A stream carrying a resolvable name, since document uploads require a file name and otherwise raise.
+# The client is mocked in these tests, so the content is never read.
+named_content = io.StringIO("")
+named_content.name = "test-document.txt"
 
 test_project = Project(1, "")
 test_document = Document(test_project.project_id, 1, "", "")
@@ -183,7 +189,7 @@ def test_resource_returns_bytes(
             (
                 1,
                 "test-name",
-                None,
+                named_content,
             ),
             "document",
         ),
@@ -204,7 +210,7 @@ def test_resource_returns_bytes(
             (
                 test_project,
                 "test-name",
-                None,
+                named_content,
             ),
             "document",
         ),
@@ -266,7 +272,7 @@ def test_resource_creation_good_route(
             (
                 1,
                 "test-name",
-                None,
+                named_content,
             ),
             "document",
         ),
@@ -287,7 +293,7 @@ def test_resource_creation_good_route(
             (
                 test_project,
                 "test-name",
-                None,
+                named_content,
             ),
             "document",
         ),
@@ -342,7 +348,7 @@ def test_document_has_project_id_injected_creation(
     test_project_id = 1
     mock_http_response.json.return_value = {"body": serialized_document}
     mock_client(mock_http_adapter).post.return_value = mock_http_response
-    response = mock_http_adapter.create_document(test_project_id, "test-name", cast(IO, None))
+    response = mock_http_adapter.create_document(test_project_id, "test-name", named_content)
     assert response.project_id == test_project_id
 
 
@@ -427,16 +433,80 @@ def test_content_upload_passes_content_as_named_file_tuple(
     mock_http_adapter: HttpInceptionAdapter,
     mock_http_response: Mock,
     serializations: dict,
-    mock_io: IO,
 ):
     # The client's _request unpacks every files value as a (name, stream) tuple, so all content
-    # uploads must pass files={"content": (name, stream)} rather than a bare stream.
+    # uploads must pass files={"content": (name, stream)} rather than a bare stream. A named stream
+    # is used so the document upload can resolve a file name (annotations/curations ignore it).
     mock_http_response.json.return_value = {"body": serializations[resource]}
     mock_client(mock_http_adapter).post.return_value = mock_http_response
-    function(mock_http_adapter, *params, mock_io)
+    named_stream = io.StringIO("test-content")
+    named_stream.name = "/tmp/example.txt"
+    function(mock_http_adapter, *params, named_stream)
     content = mock_client(mock_http_adapter).post.call_args.kwargs["files"]["content"]
     _, stream = content
-    assert stream is mock_io
+    assert stream is named_stream
+
+
+def test_document_upload_uses_explicit_filename(mock_http_adapter, mock_http_response, serializations, mock_io):
+    # An explicit filename is recorded as the uploaded file's name.
+    mock_http_response.json.return_value = {"body": serializations["document"]}
+    mock_client(mock_http_adapter).post.return_value = mock_http_response
+    mock_http_adapter.create_document(1, "test-name", mock_io, filename="example.xmi")
+    name, _ = mock_client(mock_http_adapter).post.call_args.kwargs["files"]["content"]
+    assert name == "example.xmi"
+
+
+def test_document_upload_derives_filename_from_file_object(mock_http_adapter, mock_http_response, serializations):
+    # A real, named file object contributes its basename (path stripped) when no filename is given.
+    mock_http_response.json.return_value = {"body": serializations["document"]}
+    mock_client(mock_http_adapter).post.return_value = mock_http_response
+    named_stream = io.StringIO("test-content")
+    named_stream.name = "/tmp/example.xmi"
+    mock_http_adapter.create_document(1, "test-name", named_stream)
+    name, _ = mock_client(mock_http_adapter).post.call_args.kwargs["files"]["content"]
+    assert name == "example.xmi"
+
+
+def test_document_upload_derives_filename_from_bytes_path_file_object(
+    mock_http_adapter, mock_http_response, serializations
+):
+    # A file opened with a bytes path has a bytes .name; its basename is still derived (decoded to str).
+    mock_http_response.json.return_value = {"body": serializations["document"]}
+    mock_client(mock_http_adapter).post.return_value = mock_http_response
+    named_stream = io.StringIO("test-content")
+    named_stream.name = b"/tmp/example.xmi"
+    mock_http_adapter.create_document(1, "test-name", named_stream)
+    name, _ = mock_client(mock_http_adapter).post.call_args.kwargs["files"]["content"]
+    assert name == "example.xmi"
+
+
+def test_document_upload_requires_resolvable_filename(mock_http_adapter, mock_http_response, serializations, mock_io):
+    # An anonymous stream (no .name) with no explicit filename must raise rather than upload as "data".
+    mock_http_response.json.return_value = {"body": serializations["document"]}
+    mock_client(mock_http_adapter).post.return_value = mock_http_response
+    with pytest.raises(ValueError):
+        mock_http_adapter.create_document(1, "test-name", mock_io)
+
+
+@pytest.mark.parametrize(
+    "function, params, resource",
+    [
+        (HttpInceptionAdapter.create_annotation, (1, 1, "test-user"), "annotation"),
+        (HttpInceptionAdapter.create_curation, (1, 1), "curation"),
+    ],
+)
+def test_annotation_and_curation_upload_always_use_data_filename(
+    function, params, resource, mock_http_adapter, mock_http_response, serializations
+):
+    # The server ignores the uploaded part name for annotations/curations, so it is always "data"
+    # even when the content is a named file object.
+    mock_http_response.json.return_value = {"body": serializations[resource]}
+    mock_client(mock_http_adapter).post.return_value = mock_http_response
+    named_stream = io.StringIO("test-content")
+    named_stream.name = "/tmp/example.xmi"
+    function(mock_http_adapter, *params, named_stream)
+    name, _ = mock_client(mock_http_adapter).post.call_args.kwargs["files"]["content"]
+    assert name == "data"
 
 
 @pytest.mark.parametrize(
