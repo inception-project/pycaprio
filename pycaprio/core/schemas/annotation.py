@@ -22,16 +22,16 @@ class AnnotationSchema(BaseInceptionSchema[Annotation]):
     """
 
     @overload
-    def load(self, serialized_annotation: List[dict], many: Literal[True]) -> List[Annotation]: ...
+    def load(self, serialized_object_or_list: List[dict], many: Literal[True]) -> List[Annotation]: ...
 
     @overload
-    def load(self, serialized_annotation: dict, many: Literal[False] = False) -> Annotation: ...
+    def load(self, serialized_object_or_list: dict, many: Literal[False] = False) -> Annotation: ...
 
-    def load(self, serialized_annotation: serialized_type, many: bool = False) -> deserialized_type:
+    def load(self, serialized_object_or_list: serialized_type, many: bool = False) -> deserialized_type:
         if many:
-            return [self.load(annotation) for annotation in cast(List[dict], serialized_annotation)]
+            return [self.load(annotation) for annotation in cast(List[dict], serialized_object_or_list)]
 
-        serialized_annotation = cast(dict, serialized_annotation)
+        serialized_annotation = cast(dict, serialized_object_or_list)
         datetime_timestamp = None
         if serialized_annotation["timestamp"]:
             datetime_timestamp = datetime.datetime.strptime(serialized_annotation["timestamp"], DATE_FORMAT_ISO8601)
@@ -41,15 +41,15 @@ class AnnotationSchema(BaseInceptionSchema[Annotation]):
         )
 
     @overload
-    def dump(self, annotation: List[Annotation], many: Literal[True]) -> List[dict]: ...
+    def dump(self, deserialized_object_or_list: List[Annotation], many: Literal[True]) -> List[dict]: ...
 
     @overload
-    def dump(self, annotation: Annotation, many: Literal[False] = False) -> dict: ...
+    def dump(self, deserialized_object_or_list: Annotation, many: Literal[False] = False) -> dict: ...
 
-    def dump(self, annotation: deserialized_type, many: bool = False) -> serialized_type:
+    def dump(self, deserialized_object_or_list: deserialized_type, many: bool = False) -> serialized_type:
         if many:
-            return [self.dump(a) for a in cast(List[Annotation], annotation)]
-        annotation = cast(Annotation, annotation)
+            return [self.dump(a) for a in cast(List[Annotation], deserialized_object_or_list)]
+        annotation = cast(Annotation, deserialized_object_or_list)
         str_timestamp = None
         if annotation.timestamp:
             str_timestamp = annotation.timestamp.strftime(DATE_FORMAT_ISO8601)

@@ -71,24 +71,27 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
         self,
         project: Union[Project, int, str],
         document: Union[Document, int, str],
-        annotation: Union[int, str, Annotation],
+        user_name: str,
         annotation_format: str = InceptionFormat.DEFAULT,
     ) -> bytes:
         """
-        Retrieves a Document
+        Retrieves an Annotation
         :param project: The project/project id of the Project where the Annotation is located
         :param document: The document/document_id of the Document where the Annotation is located
-        :param annotation: The annotation/annotation's id
+        :param user_name: Annotator's username.
         :param annotation_format: Format in which the annotation will be downloaded
         :return: Content of the Annotation in bytes
         """
         pass  # pragma: no cover
 
     @abstractmethod
-    def create_project(self, project_name: str, creator_name: str) -> Project:
+    def create_project(
+        self, project_name: str, project_title: Optional[str] = None, creator_name: Optional[str] = None
+    ) -> Project:
         """
         Creates a Project
         :param project_name: Name of the project. Must be unique.
+        :param project_title: Title of the project. Defaults to the project name.
         :param creator_name: Username of the user which is going to create the project.
         Default's to the authenticated user.
         :return: Recently created Project
@@ -129,16 +132,16 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
         content: IO,
         annotation_format: str = InceptionFormat.DEFAULT,
         annotation_state: str = AnnotationState.DEFAULT,
-    ):
+    ) -> Annotation:
         """
-        Creates a Document
-        :param project: Project/Id of the Project where the new Document will be created
+        Creates an Annotation
+        :param project: Project/Id of the Project where the new Annotation will be created
         :param document: Document/Id of the Document which is targeted for annotation.
         :param user_name: Annotator's username.
         :param content: Content of the Annotation.
         :param annotation_format: Annotation format.
         :param annotation_state: State of the Annotation.
-        :return: Recently created Document.
+        :return: Recently created Annotation.
         """
         pass  # pragma: no cover
 

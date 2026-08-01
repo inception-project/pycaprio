@@ -14,8 +14,6 @@
     "**/__pycache__",
     "**/.*"
   ],
-  "typeCheckingMode": "basic",
-  "reportMissingTypeStubs": false,
-  "reportOptionalMemberAccess": false,
-  "reportMissingImports": false
+  "typeCheckingMode": "standard",
+  "reportMissingTypeStubs": false
 }

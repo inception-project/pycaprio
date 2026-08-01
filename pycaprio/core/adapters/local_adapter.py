@@ -97,12 +97,19 @@ class LocalInceptionAdapter(BaseInceptionAdapter):
 
         return document_list
 
-    def document(self, project: Union[Project, int, str], document: Union[Document, int, str]) -> bytes:
+    def document(
+        self,
+        project: Union[Project, int, str],
+        document: Union[Document, int, str],
+        document_format: str = InceptionFormat.DEFAULT,
+    ) -> bytes:
         """
         Returns the content of a document.
+        NOTE: Returns the source file as it was originally imported; no format conversion is performed.
 
         :param project: Project object or project ID. (Project ID is the filename of the exported project ZIP file.)
         :param document: Document object or document ID. (Document ID is the filename of the document in the ZIP file.)
+        :param document_format: Ignored; the source file is returned in the format it was imported in.
         """
 
         project_id = project.project_id if isinstance(project, Project) else project
@@ -143,7 +150,11 @@ class LocalInceptionAdapter(BaseInceptionAdapter):
         return annotation_list
 
     def annotation(
-        self, project: Union[Project, int, str], document: Union[Document, int, str], user_name: str
+        self,
+        project: Union[Project, int, str],
+        document: Union[Document, int, str],
+        user_name: str,
+        annotation_format: str = InceptionFormat.UIMA_CAS_JSON_0_4_0,
     ) -> bytes:
         """
         Returns the content of an annotation.
@@ -152,7 +163,13 @@ class LocalInceptionAdapter(BaseInceptionAdapter):
         :param project: Project object or project ID. (Project ID is the filename of the exported project ZIP file.)
         :param document: Document object or document ID. (Document ID is the filename of the document in the ZIP file.)
         :param user_name: User name of the annotator.
+        :param annotation_format: Only JSON CAS is available in an exported project.
         """
+        if annotation_format != InceptionFormat.UIMA_CAS_JSON_0_4_0:
+            raise ValueError(
+                f"LocalInceptionAdapter can only return annotations in "
+                f"{InceptionFormat.UIMA_CAS_JSON_0_4_0} format, but {annotation_format} was requested."
+            )
 
         project_id = project.project_id if isinstance(project, Project) else project
         document_id = document.document_id if isinstance(document, Document) else document
@@ -161,7 +178,7 @@ class LocalInceptionAdapter(BaseInceptionAdapter):
             with zip_ref.open(f"annotation/{document_id}/{user_name}.json") as document_file:
                 return document_file.read()
 
-    def create_project(self, project_name, creator_name):
+    def create_project(self, project_name, project_title=None, creator_name=None):
         raise NotImplementedError
 
     def create_document(

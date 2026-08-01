@@ -206,8 +206,8 @@ class HttpInceptionAdapter(BaseInceptionAdapter):
         response = self.client.get(f"/projects/{project_id}/export.zip", params={"format": project_format})
         return response.content
 
-    def import_project(self, zip_stream: IO) -> Project:
-        response = self.client.post("/projects/import", files={"file": ("data", zip_stream)})
+    def import_project(self, zip_file: IO) -> Project:
+        response = self.client.post("/projects/import", files={"file": ("data", zip_file)})
         return ProjectSchema().load(response.json()["body"], many=False)
 
     def curations(

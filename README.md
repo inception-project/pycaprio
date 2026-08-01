@@ -23,7 +23,7 @@ from pycaprio import Pycaprio
 pycaprio_client = Pycaprio("http://inception-host.com", ('username', 'password'))
 
 # Create a project
-pycaprio_client.api.create_project("Project name", "creator-username")
+pycaprio_client.api.create_project("Project name", creator_name="creator-username")
 ```
 
 Check the [documentation](https://pycaprio.readthedocs.io) if you want to know more.

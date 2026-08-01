@@ -19,27 +19,27 @@ class DocumentSchema(BaseInceptionSchema[Document]):
     """
 
     @overload
-    def load(self, serialized_document: List[dict], many: Literal[True]) -> List[Document]: ...
+    def load(self, serialized_object_or_list: List[dict], many: Literal[True]) -> List[Document]: ...
 
     @overload
-    def load(self, serialized_document: dict, many: Literal[False] = False) -> Document: ...
+    def load(self, serialized_object_or_list: dict, many: Literal[False] = False) -> Document: ...
 
-    def load(self, serialized_document: serialized_type, many: bool = False) -> deserialized_type:
+    def load(self, serialized_object_or_list: serialized_type, many: bool = False) -> deserialized_type:
         if many:
-            return [self.load(d) for d in cast(List[dict], serialized_document)]
-        serialized_document = cast(dict, serialized_document)
+            return [self.load(d) for d in cast(List[dict], serialized_object_or_list)]
+        serialized_document = cast(dict, serialized_object_or_list)
         return Document(
             NO_PROJECT, serialized_document["id"], serialized_document["name"], serialized_document["state"]
         )
 
     @overload
-    def dump(self, document: List[Document], many: Literal[True]) -> List[dict]: ...
+    def dump(self, deserialized_object_or_list: List[Document], many: Literal[True]) -> List[dict]: ...
 
     @overload
-    def dump(self, document: Document, many: Literal[False] = False) -> dict: ...
+    def dump(self, deserialized_object_or_list: Document, many: Literal[False] = False) -> dict: ...
 
-    def dump(self, document: deserialized_type, many: bool = False) -> serialized_type:
+    def dump(self, deserialized_object_or_list: deserialized_type, many: bool = False) -> serialized_type:
         if many:
-            return [self.dump(d) for d in cast(List[Document], document)]
-        document = cast(Document, document)
+            return [self.dump(d) for d in cast(List[Document], deserialized_object_or_list)]
+        document = cast(Document, deserialized_object_or_list)
         return {"id": document.document_id, "name": document.document_name, "state": document.document_state}

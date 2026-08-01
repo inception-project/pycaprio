@@ -22,16 +22,16 @@ class CurationSchema(BaseInceptionSchema[Curation]):
     """
 
     @overload
-    def load(self, serialized_curation: List[dict], many: Literal[True]) -> List[Curation]: ...
+    def load(self, serialized_object_or_list: List[dict], many: Literal[True]) -> List[Curation]: ...
 
     @overload
-    def load(self, serialized_curation: dict, many: Literal[False] = False) -> Curation: ...
+    def load(self, serialized_object_or_list: dict, many: Literal[False] = False) -> Curation: ...
 
-    def load(self, serialized_curation: serialized_type, many: bool = False) -> deserialized_type:
+    def load(self, serialized_object_or_list: serialized_type, many: bool = False) -> deserialized_type:
         if many:
-            return [self.load(curation) for curation in cast(List[dict], serialized_curation)]
+            return [self.load(curation) for curation in cast(List[dict], serialized_object_or_list)]
 
-        serialized_curation = cast(dict, serialized_curation)
+        serialized_curation = cast(dict, serialized_object_or_list)
         datetime_timestamp = None
         if serialized_curation["timestamp"]:
             datetime_timestamp = datetime.datetime.strptime(serialized_curation["timestamp"], DATE_FORMAT_ISO8601)
@@ -41,15 +41,15 @@ class CurationSchema(BaseInceptionSchema[Curation]):
         )
 
     @overload
-    def dump(self, curation: List[Curation], many: Literal[True]) -> List[dict]: ...
+    def dump(self, deserialized_object_or_list: List[Curation], many: Literal[True]) -> List[dict]: ...
 
     @overload
-    def dump(self, curation: Curation, many: Literal[False] = False) -> dict: ...
+    def dump(self, deserialized_object_or_list: Curation, many: Literal[False] = False) -> dict: ...
 
-    def dump(self, curation: deserialized_type, many: bool = False) -> serialized_type:
+    def dump(self, deserialized_object_or_list: deserialized_type, many: bool = False) -> serialized_type:
         if many:
-            return [self.dump(a) for a in cast(List[Curation], curation)]
-        curation = cast(Curation, curation)
+            return [self.dump(a) for a in cast(List[Curation], deserialized_object_or_list)]
+        curation = cast(Curation, deserialized_object_or_list)
         str_timestamp = None
         if curation.timestamp:
             str_timestamp = curation.timestamp.strftime(DATE_FORMAT_ISO8601)
