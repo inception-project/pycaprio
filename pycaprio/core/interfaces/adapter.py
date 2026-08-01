@@ -52,7 +52,9 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
         :param project: The project/project id of the Project where the Document is located
         :param document: Document/Document id
         :param document_format: Format in which the document will be downloaded
-        :return: Content of the Document in bytes
+        :return: Content of the Document in bytes: either the document file itself or, for formats
+                 that emit several files (e.g. UIMA CAS XMI), a ZIP archive the caller must unpack.
+                 See the "What downloads return" section of the format documentation.
         """
         pass  # pragma: no cover
 
@@ -80,7 +82,9 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
         :param document: The document/document_id of the Document where the Annotation is located
         :param user_name: Annotator's username.
         :param annotation_format: Format in which the annotation will be downloaded
-        :return: Content of the Annotation in bytes
+        :return: Content of the Annotation in bytes: either the annotation file itself or, for
+                 formats that emit several files (e.g. UIMA CAS XMI), a ZIP archive the caller must
+                 unpack. See the "What downloads return" section of the format documentation.
         """
         pass  # pragma: no cover
 
@@ -254,7 +258,9 @@ class BaseInceptionAdapter(metaclass=ABCMeta):
         :param document: Document/Id of the Document in Curation.
         :param curation_format: Curation format.
         :param project: Project/Project id.
-        :return: bytes
+        :return: Content of the curation in bytes: either the curation file itself or, for formats
+                 that emit several files (e.g. UIMA CAS XMI), a ZIP archive the caller must unpack.
+                 See the "What downloads return" section of the format documentation.
         """
         pass  # pragma: no cover
 

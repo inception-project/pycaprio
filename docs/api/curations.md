@@ -27,6 +27,13 @@ You can specify the curation's format via `curation_format` (defaults to `webann
 You can provide a `Project` instance instead of a `project_id` as well.
 You can provide a `Document` instance instead of a `document_id` as well.
 
+**What you get back**: the returned value is always raw `bytes`, but its content depends on
+the requested `curation_format`. For most formats it is the curation file itself; for
+formats that need to emit several files — such as UIMA CAS XMI — INCEpTION returns a **ZIP
+archive** that you have to unpack first, as the XMI example below shows. See
+[What downloads return](formats.md#what-downloads-return) for how to tell the two cases
+apart at runtime.
+
 Example:
 
 ```python

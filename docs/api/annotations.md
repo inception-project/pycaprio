@@ -39,6 +39,13 @@ with open("downloaded_annotation", 'wb') as annotation_file:
     annotation_file.write(annotation_content)
 ```
 
+**What you get back**: the returned value is always raw `bytes`, but its content depends on
+the requested `annotation_format`. For most formats it is the annotation file itself; for
+formats that need to emit several files — such as UIMA CAS XMI, which pairs the `.xmi` with
+a `TypeSystem.xml` — INCEpTION returns a **ZIP archive** that you have to unpack first. See
+[What downloads return](formats.md#what-downloads-return) for a worked example and for how
+to tell the two cases apart at runtime.
+
 ### Upload annotation
 Uploads an annotation to a document in INCEpTION. It requires the Id of the project, the Id of the document, the annotator's username and the annotation's content (io stream).
 

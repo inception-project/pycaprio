@@ -37,6 +37,13 @@ with open("downloaded_document", 'wb') as document_file:
     document_file.write(document_content)
 ```
 
+**What you get back**: the returned value is always raw `bytes`, but its content depends on
+the requested `document_format`. For most formats it is the document file itself; for
+formats that need to emit several files — such as UIMA CAS XMI or HTML (ZIP) — INCEpTION
+returns a **ZIP archive** that you have to unpack first. See
+[What downloads return](formats.md#what-downloads-return) for a worked example and for how
+to tell the two cases apart at runtime.
+
 ### Upload document
 Uploads a document to a project in INCEpTION. It requires the Id of the project, the name of the document and the content of it (io stream).
 
