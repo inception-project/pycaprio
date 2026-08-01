@@ -1,28 +1,37 @@
 import datetime
-from typing import Union
-
 from typing import List
+from typing import Literal
+from typing import Union
+from typing import cast
+from typing import overload
 
 from pycaprio.core.interfaces.schema import BaseInceptionSchema
+from pycaprio.core.interfaces.schema import serialized_type
 from pycaprio.core.mappings import DATE_FORMAT_ISO8601
 from pycaprio.core.mappings import NO_DOCUMENT
 from pycaprio.core.mappings import NO_PROJECT
 from pycaprio.core.objects.annotation import Annotation
 
-serialized_type = Union[List[dict], dict]
 deserialized_type = Union[List[Annotation], Annotation]
 
 
-class AnnotationSchema(BaseInceptionSchema):
+class AnnotationSchema(BaseInceptionSchema[Annotation]):
     """
     Schema to serialize/deserialize Annotations.
     Documentation is described in 'BaseInceptionSchema'.
     """
 
-    def load(self, serialized_annotation: serialized_type, many: bool = False):
-        if many:
-            return [self.load(annotation) for annotation in serialized_annotation]
+    @overload
+    def load(self, serialized_annotation: List[dict], many: Literal[True]) -> List[Annotation]: ...
 
+    @overload
+    def load(self, serialized_annotation: dict, many: Literal[False] = False) -> Annotation: ...
+
+    def load(self, serialized_annotation: serialized_type, many: bool = False) -> deserialized_type:
+        if many:
+            return [self.load(annotation) for annotation in cast(List[dict], serialized_annotation)]
+
+        serialized_annotation = cast(dict, serialized_annotation)
         datetime_timestamp = None
         if serialized_annotation["timestamp"]:
             datetime_timestamp = datetime.datetime.strptime(serialized_annotation["timestamp"], DATE_FORMAT_ISO8601)
@@ -31,9 +40,16 @@ class AnnotationSchema(BaseInceptionSchema):
             NO_PROJECT, NO_DOCUMENT, serialized_annotation["user"], serialized_annotation["state"], datetime_timestamp
         )
 
-    def dump(self, annotation: deserialized_type, many: bool = False):
+    @overload
+    def dump(self, annotation: List[Annotation], many: Literal[True]) -> List[dict]: ...
+
+    @overload
+    def dump(self, annotation: Annotation, many: Literal[False] = False) -> dict: ...
+
+    def dump(self, annotation: deserialized_type, many: bool = False) -> serialized_type:
         if many:
-            return [self.dump(a) for a in annotation]
+            return [self.dump(a) for a in cast(List[Annotation], annotation)]
+        annotation = cast(Annotation, annotation)
         str_timestamp = None
         if annotation.timestamp:
             str_timestamp = annotation.timestamp.strftime(DATE_FORMAT_ISO8601)
