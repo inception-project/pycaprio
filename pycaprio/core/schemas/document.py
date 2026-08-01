@@ -1,29 +1,45 @@
-from typing import Union
-
 from typing import List
+from typing import Literal
+from typing import Union
+from typing import cast
+from typing import overload
 
 from pycaprio.core.interfaces.schema import BaseInceptionSchema
+from pycaprio.core.interfaces.schema import serialized_type
 from pycaprio.core.mappings import NO_PROJECT
 from pycaprio.core.objects.document import Document
 
-serialized_type = Union[List[dict], dict]
 deserialized_type = Union[List[Document], Document]
 
 
-class DocumentSchema(BaseInceptionSchema):
+class DocumentSchema(BaseInceptionSchema[Document]):
     """
     Schema to serialize/deserialize Documents.
     Documentation is described in 'BaseInceptionSchema'.
     """
 
-    def load(self, serialized_document, many: bool = False):
+    @overload
+    def load(self, serialized_document: List[dict], many: Literal[True]) -> List[Document]: ...
+
+    @overload
+    def load(self, serialized_document: dict, many: Literal[False] = False) -> Document: ...
+
+    def load(self, serialized_document: serialized_type, many: bool = False) -> deserialized_type:
         if many:
-            return [self.load(d) for d in serialized_document]
+            return [self.load(d) for d in cast(List[dict], serialized_document)]
+        serialized_document = cast(dict, serialized_document)
         return Document(
             NO_PROJECT, serialized_document["id"], serialized_document["name"], serialized_document["state"]
         )
 
-    def dump(self, document, many: bool = False):
+    @overload
+    def dump(self, document: List[Document], many: Literal[True]) -> List[dict]: ...
+
+    @overload
+    def dump(self, document: Document, many: Literal[False] = False) -> dict: ...
+
+    def dump(self, document: deserialized_type, many: bool = False) -> serialized_type:
         if many:
-            return [self.dump(d) for d in document]
+            return [self.dump(d) for d in cast(List[Document], document)]
+        document = cast(Document, document)
         return {"id": document.document_id, "name": document.document_name, "state": document.document_state}
