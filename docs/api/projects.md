@@ -6,6 +6,21 @@ Pycaprio uses the `Project` object to model INCEpTION's projects, and has these 
 * `project_name`: Project name (string).
 * `project_title`: Project title (string).
 
+### Identifying a project
+
+Methods that take a `project` accept either a `Project` instance or a project id. The INCEpTION
+remote API currently resolves projects by **numeric id only** — a project name or URL slug is not
+accepted (see [inception#3457](https://github.com/inception-project/inception/issues/3457)) and
+raises `IllegalIdentifier`. To work from a name, look the id up first:
+
+```python
+project = next(p for p in client.api.projects() if p.project_name == "my-project-name")
+content = client.api.export_project(project)
+```
+
+`IllegalIdentifier` subclasses `InceptionBadResponse`, so existing handlers catching the latter
+continue to work. The same applies to `document` arguments.
+
 ### List projects
 Lists all the projects that are in INCEpTION.
 

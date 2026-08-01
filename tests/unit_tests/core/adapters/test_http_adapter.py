@@ -6,6 +6,7 @@ import pytest
 
 from pycaprio.mappings import AnnotationState
 from pycaprio.core.adapters.http_adapter import HttpInceptionAdapter
+from pycaprio.core.exceptions import IllegalIdentifier, InceptionBadResponse
 from pycaprio.core.objects import Project, Document, Annotation, Curation
 
 
@@ -521,6 +522,185 @@ def test_annotation_and_curation_upload_always_use_data_filename(
 )
 def test_get_object_id_value_ok(mock_http_adapter, value, expected_value):
     assert mock_http_adapter._get_object_id(value) == expected_value
+
+
+def error_response(message: str) -> Mock:
+    """Builds the HTTP 500 error envelope INCEpTION returns, wrapping the given message."""
+    response = Mock()
+    response.status_code = 500
+    response.text = f'{{"messages":[{{"level":"ERROR","message":"{message}"}}]}}'
+    return response
+
+
+def number_format_response(rejected_value: str, legacy: bool = False, parameter: str = "projectId") -> Mock:
+    """
+    Builds the HTTP 500 INCEpTION returns when it cannot parse a path variable as a long.
+
+    The wording differs across versions, so both are exercised: 'legacy' is the message reported in
+    issue #15 (with a nested NumberFormatException and no parameter name), the default is what
+    current INCEpTION returns.
+    """
+    if legacy:
+        message = (
+            "Internal server error: Failed to convert value of type 'java.lang.String' to required "
+            f"type 'long'; nested exception is java.lang.NumberFormatException: For input string: \\\"{rejected_value}\\\""
+        )
+    else:
+        message = (
+            f"Internal server error: Method parameter '{parameter}': Failed to convert value of type "
+            f"'java.lang.String' to required type 'long'; For input string: \\\"{rejected_value}\\\""
+        )
+    return error_response(message)
+
+
+# One representative per (verb, has-document-slot) combination the translation has to cover.
+@pytest.mark.parametrize(
+    "function, params",
+    [
+        (HttpInceptionAdapter.project, ("project-name",)),
+        (HttpInceptionAdapter.delete_project, ("project-name",)),
+        (HttpInceptionAdapter.assign_roles, ("project-name", "test-user", ["ANNOTATOR"])),
+        (HttpInceptionAdapter.document, ("project-name", 1)),
+        (HttpInceptionAdapter.delete_document, ("project-name", 1)),
+        (HttpInceptionAdapter.update_annotation_state, ("project-name", 1, "test-user", AnnotationState.IN_PROGRESS)),
+    ],
+)
+# Both INCEpTION wordings must be recognised: the current one and the older nested
+# NumberFormatException reported in issue #15.
+@pytest.mark.parametrize("legacy", [False, True])
+def test_project_name_raises_illegal_identifier(function, params, legacy, mock_http_adapter):
+    # Passing a project name where the remote API wants a numeric id must surface as an actionable
+    # pycaprio error rather than INCEpTION's raw Java NumberFormatException.
+    bad_response = number_format_response("project-name", legacy=legacy)
+    for verb in ("get", "post", "delete"):
+        getattr(mock_client(mock_http_adapter), verb).side_effect = InceptionBadResponse(bad_response)
+
+    with pytest.raises(IllegalIdentifier) as exception_info:
+        function(mock_http_adapter, *params)
+
+    error = exception_info.value
+    assert error.parameter_name == "project"
+    assert error.identifier == "project-name"
+    assert "project-name" in str(error)
+    assert "numeric project ids" in str(error)
+    assert "client.api.projects()" in str(error)
+    # Stays catchable as the generic error, so existing handlers keep working.
+    assert isinstance(error, InceptionBadResponse)
+
+
+def test_document_name_raises_illegal_identifier(mock_http_adapter):
+    # The same translation applies to document identifiers, attributed to the right parameter.
+    bad_response = number_format_response("document-name")
+    mock_client(mock_http_adapter).get.side_effect = InceptionBadResponse(bad_response)
+
+    with pytest.raises(IllegalIdentifier) as exception_info:
+        mock_http_adapter.document(1, "document-name")
+
+    assert exception_info.value.parameter_name == "document"
+    assert exception_info.value.identifier == "document-name"
+
+
+def test_unrelated_number_format_error_is_not_translated(mock_http_adapter):
+    # A NumberFormatException about a value we did not send is INCEpTION's own problem; it must
+    # propagate untouched rather than being mislabelled as a bad project identifier.
+    bad_response = number_format_response("something-internal")
+    mock_client(mock_http_adapter).get.side_effect = InceptionBadResponse(bad_response)
+
+    with pytest.raises(InceptionBadResponse) as exception_info:
+        mock_http_adapter.documents(1)
+
+    assert not isinstance(exception_info.value, IllegalIdentifier)
+
+
+def test_out_of_range_numeric_id_is_not_translated(mock_http_adapter):
+    # A numeric id too large for a Java long fails to parse for a completely different reason.
+    # Claiming "ids must be numeric, not names or slugs" about it would be actively misleading.
+    huge_id = "999999999999999999999999"
+    bad_response = number_format_response(huge_id)
+    mock_client(mock_http_adapter).get.side_effect = InceptionBadResponse(bad_response)
+
+    with pytest.raises(InceptionBadResponse) as exception_info:
+        mock_http_adapter.documents(huge_id)
+
+    assert not isinstance(exception_info.value, IllegalIdentifier)
+
+
+def test_attribution_follows_the_parameter_the_server_reports(mock_http_adapter):
+    # When both identifiers are the same string, matching on the value alone cannot tell them apart.
+    # INCEpTION says which path variable it was binding, so that must win over the document-first
+    # guess -- otherwise the error points at the wrong argument and hints at a lookup call
+    # (client.api.documents(project)) that needs the very project that is broken.
+    bad_response = number_format_response("bad", parameter="projectId")
+    mock_client(mock_http_adapter).get.side_effect = InceptionBadResponse(bad_response)
+
+    with pytest.raises(IllegalIdentifier) as exception_info:
+        mock_http_adapter.document("bad", "bad")
+
+    assert exception_info.value.parameter_name == "project"
+    assert "client.api.projects()" in str(exception_info.value)
+
+
+def test_attribution_follows_reported_document_parameter(mock_http_adapter):
+    # The same deference applies when the server blames the document id.
+    bad_response = number_format_response("bad", parameter="documentId")
+    mock_client(mock_http_adapter).get.side_effect = InceptionBadResponse(bad_response)
+
+    with pytest.raises(IllegalIdentifier) as exception_info:
+        mock_http_adapter.document("bad", "bad")
+
+    assert exception_info.value.parameter_name == "document"
+
+
+def test_ambiguous_identifiers_without_reported_parameter_blame_the_document(mock_http_adapter):
+    # Older INCEpTION reports no parameter name, so the document-first fallback still applies.
+    bad_response = number_format_response("bad", legacy=True)
+    mock_client(mock_http_adapter).get.side_effect = InceptionBadResponse(bad_response)
+
+    with pytest.raises(IllegalIdentifier) as exception_info:
+        mock_http_adapter.document("bad", "bad")
+
+    assert exception_info.value.parameter_name == "document"
+
+
+def test_conversion_failure_is_not_spliced_across_messages(mock_http_adapter):
+    # The error body is a JSON array of messages. A "Failed to convert" in one entry must not be
+    # stitched onto a "For input string" from an unrelated entry, which would pin a valid numeric
+    # id as illegal.
+    response = Mock()
+    response.status_code = 500
+    # Note the single-backslash escaping: this is what a real JSON error body contains, and what
+    # number_format_response() produces for the single-message case.
+    response.text = (
+        '{"messages":['
+        '{"level":"ERROR","message":"Failed to convert value of type Foo to required type \'long\'"},'
+        '{"level":"WARN","message":"unrelated batch failure: For input string: \\"77\\""}'
+        "]}"
+    )
+    mock_client(mock_http_adapter).get.side_effect = InceptionBadResponse(response)
+
+    with pytest.raises(InceptionBadResponse) as exception_info:
+        mock_http_adapter.documents(77)
+
+    assert not isinstance(exception_info.value, IllegalIdentifier)
+
+
+def test_unrelated_server_error_is_not_translated(mock_http_adapter):
+    # An ordinary failure must keep its original error.
+    bad_response = error_response("Internal server error: something else")
+    mock_client(mock_http_adapter).get.side_effect = InceptionBadResponse(bad_response)
+
+    with pytest.raises(InceptionBadResponse) as exception_info:
+        mock_http_adapter.documents("project-name")
+
+    assert not isinstance(exception_info.value, IllegalIdentifier)
+
+
+def test_numeric_string_project_id_still_works(mock_http_adapter, mock_http_response, serializations):
+    # A numeric id passed as a string is legitimate and must not be affected by the translation.
+    mock_http_response.json.return_value = {"body": [serializations["document"]]}
+    mock_client(mock_http_adapter).get.return_value = mock_http_response
+    mock_http_adapter.documents("1")
+    assert mock_client(mock_http_adapter).get.call_args.args[0] == "/projects/1/documents"
 
 
 @pytest.mark.parametrize(
