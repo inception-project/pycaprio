@@ -46,9 +46,7 @@ class Pycaprio:
                     "You can set it via environment variables as 'INCEPTION_USERNAME' and 'INCEPTION_PASSWORD'"
                 )
 
-            self.api = HttpInceptionAdapter(
-                inception_host, (username, password), ca_bundle=ca_bundle, verify=verify
-            )
+            self.api = HttpInceptionAdapter(inception_host, (username, password), ca_bundle=ca_bundle, verify=verify)
         elif local_projects_dir:
             self.api = LocalInceptionAdapter(local_projects_dir)
         else:
